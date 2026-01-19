@@ -18,6 +18,18 @@ if (localStorage.getItem('darkMode') === 'true') {
     document.body.classList.add('dark-mode');
 }
 
+// --- FUNCIÓN DE TRADUCCIÓN (NUEVA) ---
+async function translateText(text) {
+    try {
+        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|es`);
+        const data = await res.json();
+        return data.responseData.translatedText;
+    } catch (error) {
+        console.error("Error traduciendo:", error);
+        return text; // Devuelve el original si falla
+    }
+}
+
 // --- LÓGICA DE LA RULETA DIARIA (MODAL) ---
 function openWheelModal() {
     const modal = document.getElementById('wheel-modal');
@@ -34,7 +46,7 @@ function closeWheelModal() {
 
 function spinWheel() {
     const now = Date.now();
-    const cooldown = 24 * 60 * 60 * 1000;
+    const cooldown = 24 * 60 * 60 * 1000; // 24 horas
 
     if (now - lastSpin < cooldown) {
         alert("¡La ruleta aún está recargándose!");
@@ -67,31 +79,32 @@ function spinWheel() {
         saveData();
         updateUI();
         
-        // Cerrar automáticamente tras ganar
-        setTimeout(closeWheelModal, 1500);
+        setTimeout(closeWheelModal, 2000);
     }, 4000);
 }
 
 function checkWheelCooldown() {
     const btn = document.getElementById('spin-btn');
     const timer = document.getElementById('wheel-timer');
-    const statusText = document.getElementById('wheel-status-text');
+    const statusText = document.getElementById('wheel-status-text'); 
     
+    if(!btn || !timer) return;
+
     const now = Date.now();
     const cooldown = 24 * 60 * 60 * 1000;
     const remaining = cooldown - (now - lastSpin);
 
     if (remaining > 0) {
-        if (btn) btn.disabled = true;
-        const hours = Math.floor(remaining / 3600000);
+        btn.disabled = true;
+        const hours = Math.floor(remaining / (3600000));
         const mins = Math.floor((remaining % 3600000) / 60000);
         const timeStr = `${hours}h ${mins}m`;
-        if (timer) timer.innerText = `Disponible en: ${timeStr}`;
-        if (statusText) statusText.innerText = `Disponible en ${timeStr}`;
+        timer.innerText = `Disponible en: ${timeStr}`;
+        if(statusText) statusText.innerText = `Disponible en ${timeStr}`;
     } else {
-        if (btn) btn.disabled = false;
-        if (timer) timer.innerText = "¡Lista para girar!";
-        if (statusText) statusText.innerText = "¡Gira ahora GRATIS!";
+        btn.disabled = false;
+        timer.innerText = "¡Lista para girar!";
+        if(statusText) statusText.innerText = "¡Gira ahora GRATIS!";
     }
 }
 
@@ -146,13 +159,7 @@ function handleTimeout() {
 function showAchievementToast(title, icon) {
     const toast = document.createElement('div');
     toast.className = 'achievement-notification';
-    toast.innerHTML = `
-        <div class="achievement-icon">${icon}</div>
-        <div class="achievement-text">
-            <b>¡Notificación!</b>
-            <span>${title}</span>
-        </div>
-    `;
+    toast.innerHTML = `<div class="achievement-icon">${icon}</div><div class="achievement-text"><b>¡Notificación!</b><span>${title}</span></div>`;
     document.body.appendChild(toast);
     setTimeout(() => toast.classList.add('show'), 100);
     setTimeout(() => {
@@ -220,7 +227,7 @@ function updateUI() {
     checkWheelCooldown();
 }
 
-// --- CONEXIÓN API ---
+// --- CONEXIÓN API (MODIFICADA PARA TRADUCCIÓN) ---
 async function fetchAPIData(amount = 10, difficulty = 'medium') {
     const diffMap = { 'facil': 'easy', 'medio': 'medium', 'dificil': 'hard' };
     const apiDiff = diffMap[difficulty] || 'medium';
@@ -228,12 +235,31 @@ async function fetchAPIData(amount = 10, difficulty = 'medium') {
     try {
         const response = await fetch(url);
         const data = await response.json();
-        return data.results.map(item => {
-            const options = [...item.incorrect_answers];
+        
+        // Traducimos cada pregunta y sus opciones
+        const translatedResults = await Promise.all(data.results.map(async (item) => {
+            const rawQ = decodeHTML(item.question);
+            const rawCorrect = decodeHTML(item.correct_answer);
+            const rawIncorrects = item.incorrect_answers.map(ans => decodeHTML(ans));
+
+            const qTraducida = await translateText(rawQ);
+            const correctTraducida = await translateText(rawCorrect);
+            const incorrectsTraducidas = await Promise.all(rawIncorrects.map(ans => translateText(ans)));
+
+            const options = [...incorrectsTraducidas];
             const correctIdx = Math.floor(Math.random() * 4);
-            options.splice(correctIdx, 0, item.correct_answer);
-            return { q: decodeHTML(item.question), options: options.map(opt => decodeHTML(opt)), correct: correctIdx, difficulty: difficulty, mode: 'trivia', img: null };
-        });
+            options.splice(correctIdx, 0, correctTraducida);
+
+            return { 
+                q: qTraducida, 
+                options: options, 
+                correct: correctIdx, 
+                difficulty: difficulty, 
+                mode: 'trivia', 
+                img: null 
+            };
+        }));
+        return translatedResults;
     } catch (e) { return null; }
 }
 
@@ -241,8 +267,7 @@ async function fetchAPIData(amount = 10, difficulty = 'medium') {
 function selectMode(m) { 
     selectedMode = m; 
     const titles = { 'logos': '🖼️ Solo Logos', 'trivia': '📚 Solo Trivia', 'mixto': '🔥 Modo Mixto' };
-    const titleEl = document.getElementById('mode-title');
-    if (titleEl) titleEl.innerText = titles[m] || 'Dificultad';
+    document.getElementById('mode-title').innerText = titles[m] || 'Dificultad';
     showScreen('screen-diffs'); 
 }
 
@@ -251,7 +276,7 @@ async function startSurvival() {
     points = 0; currentIndex = 0; lives = 3; streak = 0;
     showScreen('screen-game');
     quizSet = await fetchAPIData(10, 'facil');
-    if (!quizSet) quizSet = questionsDB.sort(() => Math.random() - 0.5).slice(0, 10);
+    if (!quizSet) quizSet = (typeof questionsDB !== 'undefined' ? questionsDB : []).sort(() => Math.random() - 0.5).slice(0, 10);
     renderQuestion();
 }
 
@@ -259,11 +284,15 @@ async function selectDifficulty(d) {
     isSurvival = false;
     selectedDiff = d.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     showScreen('screen-game');
+    
+    // Mostramos texto temporal mientras traduce
+    document.getElementById('question-text').innerText = "Traduciendo preguntas...";
+    
     const apiQuestions = await fetchAPIData(10, selectedDiff);
     if (apiQuestions && selectedMode !== 'logos') {
         quizSet = apiQuestions;
     } else {
-        quizSet = questionsDB.filter(q => {
+        quizSet = (typeof questionsDB !== 'undefined' ? questionsDB : []).filter(q => {
             const qDiff = q.difficulty.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             return (selectedMode === 'mixto' || q.mode === selectedMode) && qDiff === selectedDiff;
         });
@@ -379,7 +408,7 @@ function finish() {
     if (points > highScore) { highScore = points; }
     saveData();
     const finalPointsEl = document.getElementById('final-points');
-    if (finalPointsEl) finalPointsEl.innerText = points;
+    if(finalPointsEl) finalPointsEl.innerText = points;
     showScreen('screen-end');
 }
 
@@ -388,6 +417,4 @@ function toggleDarkMode() {
     localStorage.setItem('darkMode', isDark);
 }
 
-window.onload = () => { 
-    updateUI(); 
-};
+window.onload = () => { updateUI(); };
