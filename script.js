@@ -1,7 +1,6 @@
 // --- ESTADO ---
 let selectedMode = '', selectedDiff = '', quizSet = [], currentIndex = 0;
 let points = 0, streak = 0, lives = 3;
-let isSurvival = false;
 
 // VARIABLES DEL CRONÓMETRO
 let timerInterval;
@@ -18,7 +17,7 @@ if (localStorage.getItem('darkMode') === 'true') {
     document.body.classList.add('dark-mode');
 }
 
-// --- FUNCIÓN DE TRADUCCIÓN (NUEVA) ---
+// --- FUNCIÓN DE TRADUCCIÓN ---
 async function translateText(text) {
     try {
         const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|es`);
@@ -26,17 +25,65 @@ async function translateText(text) {
         return data.responseData.translatedText;
     } catch (error) {
         console.error("Error traduciendo:", error);
-        return text; // Devuelve el original si falla
+        return text; 
     }
 }
 
-// --- LÓGICA DE LA RULETA DIARIA (MODAL) ---
+// --- GENERADORES DE PREGUNTAS CON IMAGEN ---
+function generateLogoQuestion() {
+    const brands = [
+        { name: "Google", domain: "google.com" }, { name: "Apple", domain: "apple.com" },
+        { name: "Amazon", domain: "amazon.com" }, { name: "Microsoft", domain: "microsoft.com" },
+        { name: "Tesla", domain: "tesla.com" }, { name: "Netflix", domain: "netflix.com" },
+        { name: "Nike", domain: "nike.com" }, { name: "Coca-Cola", domain: "cocacola.com" },
+        { name: "Starbucks", domain: "starbucks.com" }, { name: "McDonald's", domain: "mcdonalds.com" }
+    ];
+    const target = brands[Math.floor(Math.random() * brands.length)];
+    let options = [target.name];
+    while(options.length < 4) {
+        let rand = brands[Math.floor(Math.random() * brands.length)].name;
+        if(!options.includes(rand)) options.push(rand);
+    }
+    options.sort(() => Math.random() - 0.5);
+    return {
+        q: "¿A qué empresa pertenece este logo?",
+        img: `https://logo.clearbit.com/${target.domain}`,
+        options: options,
+        correct: options.indexOf(target.name),
+        difficulty: "medio",
+        mode: "logos"
+    };
+}
+
+function generateFlagQuestion() {
+    const countries = [
+        { n: "España", c: "es" }, { n: "México", c: "mx" }, { n: "Argentina", c: "ar" },
+        { n: "Francia", c: "fr" }, { n: "Japón", c: "jp" }, { n: "Brasil", c: "br" },
+        { n: "Italia", c: "it" }, { n: "Estados Unidos", c: "us" },
+        { n: "Alemania", c: "de" }, { n: "Reino Unido", c: "gb" },
+        { n: "Canadá", c: "ca" }, { n: "Australia", c: "au" }, { n: "China", c: "cn" }
+    ];
+    const target = countries[Math.floor(Math.random() * countries.length)];
+    let options = [target.n];
+    while(options.length < 4) {
+        let rand = countries[Math.floor(Math.random() * countries.length)].n;
+        if(!options.includes(rand)) options.push(rand);
+    }
+    options.sort(() => Math.random() - 0.5);
+    return {
+        q: "¿A qué país pertenece esta bandera?",
+        img: `https://flagcdn.com/w320/${target.c}.png`,
+        options: options,
+        correct: options.indexOf(target.n),
+        difficulty: "facil",
+        mode: "paises"
+    };
+}
+
+// --- LÓGICA DE LA RULETA DIARIA ---
 function openWheelModal() {
     const modal = document.getElementById('wheel-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        checkWheelCooldown();
-    }
+    if (modal) { modal.style.display = 'flex'; checkWheelCooldown(); }
 }
 
 function closeWheelModal() {
@@ -46,16 +93,11 @@ function closeWheelModal() {
 
 function spinWheel() {
     const now = Date.now();
-    const cooldown = 24 * 60 * 60 * 1000; // 24 horas
-
-    if (now - lastSpin < cooldown) {
-        alert("¡La ruleta aún está recargándose!");
-        return;
-    }
+    const cooldown = 24 * 60 * 60 * 1000;
+    if (now - lastSpin < cooldown) { alert("¡La ruleta aún está recargándose!"); return; }
 
     const wheel = document.getElementById('main-wheel');
     const btn = document.getElementById('spin-btn');
-    
     const randomDeg = Math.floor(Math.random() * 360) + 1800; 
     wheel.style.transform = `rotate(${randomDeg}deg)`;
     btn.disabled = true;
@@ -63,7 +105,6 @@ function spinWheel() {
     setTimeout(() => {
         const actualDeg = randomDeg % 360;
         let prize = 100;
-        
         if (actualDeg <= 60) prize = 500;
         else if (actualDeg <= 120) prize = 1000;
         else if (actualDeg <= 180) prize = 200;
@@ -74,11 +115,9 @@ function spinWheel() {
         totalPoints += prize;
         lastSpin = Date.now();
         localStorage.setItem('lastSpin', lastSpin);
-        
         showAchievementToast(`¡Ganaste 💰 ${prize}!`, "🎰");
         saveData();
         updateUI();
-        
         setTimeout(closeWheelModal, 2000);
     }, 4000);
 }
@@ -87,20 +126,16 @@ function checkWheelCooldown() {
     const btn = document.getElementById('spin-btn');
     const timer = document.getElementById('wheel-timer');
     const statusText = document.getElementById('wheel-status-text'); 
-    
     if(!btn || !timer) return;
-
     const now = Date.now();
     const cooldown = 24 * 60 * 60 * 1000;
     const remaining = cooldown - (now - lastSpin);
-
     if (remaining > 0) {
         btn.disabled = true;
-        const hours = Math.floor(remaining / (3600000));
+        const hours = Math.floor(remaining / 3600000);
         const mins = Math.floor((remaining % 3600000) / 60000);
-        const timeStr = `${hours}h ${mins}m`;
-        timer.innerText = `Disponible en: ${timeStr}`;
-        if(statusText) statusText.innerText = `Disponible en ${timeStr}`;
+        timer.innerText = `Disponible en: ${hours}h ${mins}m`;
+        if(statusText) statusText.innerText = `Disponible en ${hours}h ${mins}m`;
     } else {
         btn.disabled = false;
         timer.innerText = "¡Lista para girar!";
@@ -117,18 +152,13 @@ function startTimer() {
         timerEl.innerText = `⏱️ ${timeLeft}s`;
         timerEl.classList.remove('timer-low');
     }
-
     timerInterval = setInterval(() => {
         timeLeft--;
         if (timerEl) {
             timerEl.innerText = `⏱️ ${timeLeft}s`;
             if (timeLeft <= 5) timerEl.classList.add('timer-low');
         }
-
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            handleTimeout();
-        }
+        if (timeLeft <= 0) { clearInterval(timerInterval); handleTimeout(); }
     }, 1000);
 }
 
@@ -137,88 +167,54 @@ function handleTimeout() {
     const q = quizSet[currentIndex];
     const correctBtn = document.querySelectorAll('.opt-btn-choice')[q.correct];
     if (correctBtn) correctBtn.classList.add('correct');
-
-    if (inventory.shield > 0) {
-        inventory.shield--;
-    } else {
-        streak = 0;
-        lives--;
-    }
-
+    if (inventory.shield > 0) inventory.shield--;
+    else { streak = 0; lives--; }
     saveData();
     updateUI();
-
-    setTimeout(async () => {
+    setTimeout(() => {
         currentIndex++;
         if (lives > 0 && currentIndex < quizSet.length) renderQuestion();
         else finish();
     }, 1200);
 }
 
-// --- SISTEMA DE NOTIFICACIONES ---
+// --- NOTIFICACIONES Y LOGROS ---
 function showAchievementToast(title, icon) {
     const toast = document.createElement('div');
     toast.className = 'achievement-notification';
     toast.innerHTML = `<div class="achievement-icon">${icon}</div><div class="achievement-text"><b>¡Notificación!</b><span>${title}</span></div>`;
     document.body.appendChild(toast);
     setTimeout(() => toast.classList.add('show'), 100);
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 500);
-    }, 4000);
+    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 500); }, 4000);
 }
 
-// --- SISTEMA DE LOGROS ---
 function checkAchievements() {
     let unlockedNew = false;
-    if (!achievements.medal1 && totalPoints >= 1000) {
-        achievements.medal1 = true;
-        showAchievementToast("Novato de Bronce (1,000 pts)", "🥉");
-        unlockedNew = true;
-    }
-    if (!achievements.medal2 && totalPoints >= 5000) {
-        achievements.medal2 = true;
-        showAchievementToast("Experto de Plata (5,000 pts)", "🥈");
-        unlockedNew = true;
-    }
-    if (!achievements.medal3 && (totalPoints >= 10000 || highScore >= 2000)) {
-        achievements.medal3 = true;
-        showAchievementToast("Leyenda de Oro (¡Eres un maestro!)", "🥇");
-        unlockedNew = true;
-    }
-    if (achievements.medal1) document.getElementById('medal-1')?.classList.add('active');
-    if (achievements.medal2) document.getElementById('medal-2')?.classList.add('active');
-    if (achievements.medal3) document.getElementById('medal-3')?.classList.add('active');
+    if (!achievements.medal1 && totalPoints >= 1000) { achievements.medal1 = true; showAchievementToast("Novato de Bronce", "🥉"); unlockedNew = true; }
+    if (!achievements.medal2 && totalPoints >= 5000) { achievements.medal2 = true; showAchievementToast("Experto de Plata", "🥈"); unlockedNew = true; }
+    if (!achievements.medal3 && (totalPoints >= 10000 || highScore >= 2000)) { achievements.medal3 = true; showAchievementToast("Leyenda de Oro", "🥇"); unlockedNew = true; }
     if (unlockedNew) saveData();
 }
 
 // --- UTILIDADES ---
-function decodeHTML(html) {
-    const txt = document.createElement("textarea");
-    txt.innerHTML = html;
-    return txt.value;
-}
+function decodeHTML(html) { const txt = document.createElement("textarea"); txt.innerHTML = html; return txt.value; }
 
 function updateUI() {
     const highScoreEl = document.getElementById('high-score-display');
     const totalCurrencyEl = document.getElementById('total-currency-display');
     if(highScoreEl) highScoreEl.innerText = `Récord: ${highScore}`;
     if(totalCurrencyEl) totalCurrencyEl.innerText = `💰 ${totalPoints}`;
-
     const scoreEl = document.getElementById('score');
     const livesEl = document.getElementById('lives-container');
     const comboEl = document.getElementById('combo-badge');
     const shieldInd = document.getElementById('shield-indicator');
-
     if (scoreEl) scoreEl.innerText = points;
     if (livesEl) livesEl.innerText = "❤️".repeat(Math.max(0, lives));
-    
     if (comboEl) {
         const val = (1 + (streak * 0.1)).toFixed(1);
         comboEl.innerText = `x${val}`;
         streak >= 3 ? comboEl.classList.add('combo-active') : comboEl.classList.remove('combo-active');
     }
-
     if (shieldInd) {
         shieldInd.style.display = inventory.shield > 0 ? 'block' : 'none';
         shieldInd.innerText = `🛡️ x${inventory.shield}`;
@@ -227,7 +223,7 @@ function updateUI() {
     checkWheelCooldown();
 }
 
-// --- CONEXIÓN API (MODIFICADA PARA TRADUCCIÓN) ---
+// --- CONEXIÓN API ---
 async function fetchAPIData(amount = 10, difficulty = 'medium') {
     const diffMap = { 'facil': 'easy', 'medio': 'medium', 'dificil': 'hard' };
     const apiDiff = diffMap[difficulty] || 'medium';
@@ -235,67 +231,41 @@ async function fetchAPIData(amount = 10, difficulty = 'medium') {
     try {
         const response = await fetch(url);
         const data = await response.json();
-        
-        // Traducimos cada pregunta y sus opciones
-        const translatedResults = await Promise.all(data.results.map(async (item) => {
-            const rawQ = decodeHTML(item.question);
-            const rawCorrect = decodeHTML(item.correct_answer);
-            const rawIncorrects = item.incorrect_answers.map(ans => decodeHTML(ans));
-
-            const qTraducida = await translateText(rawQ);
-            const correctTraducida = await translateText(rawCorrect);
-            const incorrectsTraducidas = await Promise.all(rawIncorrects.map(ans => translateText(ans)));
-
-            const options = [...incorrectsTraducidas];
+        return await Promise.all(data.results.map(async (item) => {
+            const qT = await translateText(decodeHTML(item.question));
+            const cT = await translateText(decodeHTML(item.correct_answer));
+            const iT = await Promise.all(item.incorrect_answers.map(async i => await translateText(decodeHTML(i))));
+            const options = [...iT];
             const correctIdx = Math.floor(Math.random() * 4);
-            options.splice(correctIdx, 0, correctTraducida);
-
-            return { 
-                q: qTraducida, 
-                options: options, 
-                correct: correctIdx, 
-                difficulty: difficulty, 
-                mode: 'trivia', 
-                img: null 
-            };
+            options.splice(correctIdx, 0, cT);
+            return { q: qT, options: options, correct: correctIdx, difficulty: difficulty, mode: 'trivia', img: null };
         }));
-        return translatedResults;
     } catch (e) { return null; }
 }
 
 // --- LÓGICA DE MODOS ---
 function selectMode(m) { 
     selectedMode = m; 
-    const titles = { 'logos': '🖼️ Solo Logos', 'trivia': '📚 Solo Trivia', 'mixto': '🔥 Modo Mixto' };
+    const titles = { 'logos': '🖼️ Solo Logos', 'trivia': '📚 Solo Trivia', 'mixto': '🔥 Modo Mixto', 'paises': '🌍 Solo Países' };
     document.getElementById('mode-title').innerText = titles[m] || 'Dificultad';
     showScreen('screen-diffs'); 
 }
 
-async function startSurvival() {
-    isSurvival = true;
-    points = 0; currentIndex = 0; lives = 3; streak = 0;
-    showScreen('screen-game');
-    quizSet = await fetchAPIData(10, 'facil');
-    if (!quizSet) quizSet = (typeof questionsDB !== 'undefined' ? questionsDB : []).sort(() => Math.random() - 0.5).slice(0, 10);
-    renderQuestion();
-}
-
 async function selectDifficulty(d) {
-    isSurvival = false;
     selectedDiff = d.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     showScreen('screen-game');
-    
-    // Mostramos texto temporal mientras traduce
-    document.getElementById('question-text').innerText = "Traduciendo preguntas...";
-    
-    const apiQuestions = await fetchAPIData(10, selectedDiff);
-    if (apiQuestions && selectedMode !== 'logos') {
-        quizSet = apiQuestions;
+    document.getElementById('question-text').innerText = "Cargando preguntas...";
+
+    if (selectedMode === 'logos') {
+        quizSet = Array.from({length: 10}, () => generateLogoQuestion());
+    } else if (selectedMode === 'paises') {
+        quizSet = Array.from({length: 10}, () => generateFlagQuestion());
     } else {
-        quizSet = (typeof questionsDB !== 'undefined' ? questionsDB : []).filter(q => {
-            const qDiff = q.difficulty.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            return (selectedMode === 'mixto' || q.mode === selectedMode) && qDiff === selectedDiff;
-        });
+        const apiQuestions = await fetchAPIData(selectedMode === 'mixto' ? 7 : 10, selectedDiff);
+        quizSet = apiQuestions || [];
+        if (selectedMode === 'mixto') {
+            quizSet.push(generateFlagQuestion(), generateFlagQuestion(), generateLogoQuestion());
+        }
     }
     quizSet.sort(() => Math.random() - 0.5);
     points = 0; currentIndex = 0; lives = 3; streak = 0;
@@ -306,13 +276,12 @@ function renderQuestion() {
     const q = quizSet[currentIndex];
     updateUI();
     startTimer();
-
     const progress = document.getElementById('progress-bar');
     if(progress) progress.style.width = `${(currentIndex / quizSet.length) * 100}%`;
     document.getElementById('question-text').innerText = q.q;
     
     const logoArea = document.getElementById('logo-area');
-    logoArea.innerHTML = q.img ? `<img src="${q.img}" alt="Logo">` : '';
+    logoArea.innerHTML = q.img ? `<img src="${q.img}" alt="Pregunta" style="max-height: 150px; border-radius: 10px;">` : '';
     logoArea.style.display = q.img ? 'flex' : 'none';
 
     const optArea = document.getElementById('options-area');
@@ -352,24 +321,14 @@ function renderQuestion() {
                 const base = selectedDiff === 'facil' ? 50 : (selectedDiff === 'medio' ? 100 : 200);
                 points += Math.round(base * (1 + streak * 0.1));
             } else {
-                if (inventory.shield > 0) {
-                    inventory.shield--;
-                    btn.classList.add('wrong');
-                } else {
-                    btn.classList.add('wrong');
-                    streak = 0;
-                    lives--;
-                }
+                if (inventory.shield > 0) { inventory.shield--; btn.classList.add('wrong'); } 
+                else { btn.classList.add('wrong'); streak = 0; lives--; }
                 document.querySelectorAll('.opt-btn-choice')[q.correct].classList.add('correct');
             }
             saveData();
             updateUI();
-            setTimeout(async () => {
+            setTimeout(() => {
                 currentIndex++;
-                if (isSurvival && currentIndex >= quizSet.length - 2) {
-                    const more = await fetchAPIData(5, 'medio');
-                    if (more) quizSet.push(...more);
-                }
                 if (lives > 0 && currentIndex < quizSet.length) renderQuestion();
                 else finish();
             }, 1200);
@@ -410,11 +369,6 @@ function finish() {
     const finalPointsEl = document.getElementById('final-points');
     if(finalPointsEl) finalPointsEl.innerText = points;
     showScreen('screen-end');
-}
-
-function toggleDarkMode() {
-    const isDark = document.body.classList.toggle('dark-mode');
-    localStorage.setItem('darkMode', isDark);
 }
 
 window.onload = () => { updateUI(); };
