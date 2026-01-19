@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Quiz Master Pro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+    <div class="global-header">
+        <button id="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
+        <div id="user-stats-header">
+            <span id="high-score-display">Récord: 0</span> | 
+            <span id="total-currency-display">💰 0</span>
+        </div>
+    </div>
+
+    <div id="screen-modes" class="screen active">
+        <h1>🧠 Quiz Master</h1>
+        <div id="medals-container">
+            <span class="medal" id="medal-ojo" title="Ojo de Lince">👁️</span>
+            <span class="medal" id="medal-rico" title="Acaudalado">💎</span>
+            <span class="medal" id="medal-invicto" title="Invencible">🛡️</span>
+        </div>
+        <div class="btn-group">
+            <button class="btn-choice" onclick="selectMode('logos')">🖼️ Solo Logos</button>
+            <button class="btn-choice" onclick="selectMode('trivia')">📚 Solo Trivia</button>
+            <button class="btn-choice" onclick="selectMode('mixto')">🔥 Modo Mixto</button>
+            <button class="btn-choice" style="background: #f1c40f; color: black;" onclick="showScreen('screen-shop')">🛒 Tienda</button>
+        </div>
+    </div>
+
+    <div id="screen-diffs" class="screen">
+        <h2 id="mode-title">Seleccionar Dificultad</h2>
+        <div class="btn-group">
+            <button class="btn-choice" onclick="selectDifficulty('fácil')">🟢 Fácil</button>
+            <button class="btn-choice" onclick="selectDifficulty('medio')">🟠 Medio</button>
+            <button class="btn-choice" onclick="selectDifficulty('difícil')">🔴 Difícil</button>
+            <button class="btn-choice" style="background: var(--dark); color: white;" onclick="showScreen('screen-modes')">Volver</button>
+        </div>
+    </div>
+
+    <div id="screen-shop" class="screen">
+        <h2>🛒 Tienda</h2>
+        <p>Puntos: <strong id="total-points-shop">0</strong></p>
+        <div class="btn-group">
+            <button class="btn-choice" onclick="buyPowerUp('shield')">🛡️ Escudo (500 pts)</button>
+            <button class="btn-choice" onclick="buyPowerUp('half')">🌓 50/50 (300 pts)</button>
+            <button class="btn-choice" style="background: var(--dark); color: white;" onclick="showScreen('screen-modes')">Volver</button>
+        </div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="meta-info">
+            <div id="lives-container" class="hearts-red">❤️❤️❤️</div>
+            <div id="powerups-active"><span id="shield-indicator" style="display:none"></span></div>
+            <div id="combo-badge">x1.0</div>
+            <span id="score">0</span>
+        </div>
+        <div class="progress-container"><div id="progress-bar"></div></div>
+        <div id="logo-area" class="img-container"></div>
+        <h3 id="question-text">Pregunta...</h3>
+        <div id="options-area" class="opt-grid"></div>
+        <div id="error-feedback" class="feedback-box"></div>
+    </div>
+
+    <div id="screen-end" class="screen">
+        <h1>¡Fin del Juego!</h1>
+        <h1 id="final-points" style="font-size: 3.5rem; color: var(--primary);">0</h1>
+        <div id="new-record-msg" style="display:none; color: var(--easy);">¡NUEVO RÉCORD!</div>
+        <button class="btn-choice" style="background: var(--dark); color: white;" onclick="location.reload()">🎮 Inicio</button>
+    </div>
+</div>
+
+<script src="questions.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
