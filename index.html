@@ -19,16 +19,49 @@
 
     <div id="screen-modes" class="screen active">
         <h1>🧠 Quiz Master</h1>
+        
         <div id="medals-container">
-            <span class="medal" id="medal-ojo" title="Ojo de Lince">👁️</span>
-            <span class="medal" id="medal-rico" title="Acaudalado">💎</span>
-            <span class="medal" id="medal-invicto" title="Invencible">🛡️</span>
+            <span id="medal-1" class="medal" title="Novato: 1,000 puntos totales">🥉</span>
+            <span id="medal-2" class="medal" title="Experto: 5,000 puntos totales">🥈</span>
+            <span id="medal-3" class="medal" title="Leyenda: 10,000 puntos totales">🥇</span>
         </div>
+
+        <div class="daily-ads-container" onclick="openWheelModal()">
+            <div class="ads-badge">GIFT</div>
+            <div class="ads-content">
+                <div class="ads-icon-wrapper">
+                    <span class="ads-icon">🎰</span>
+                </div>
+                <div class="ads-text">
+                    <b>¡Giro Diario Gratis!</b>
+                    <small id="wheel-status-text">Disponible ahora</small>
+                </div>
+            </div>
+        </div>
+
         <div class="btn-group">
             <button class="btn-choice" onclick="selectMode('logos')">🖼️ Solo Logos</button>
             <button class="btn-choice" onclick="selectMode('trivia')">📚 Solo Trivia</button>
             <button class="btn-choice" onclick="selectMode('mixto')">🔥 Modo Mixto</button>
+            <button class="btn-choice start-survival-btn" onclick="startSurvival()" style="border-color: var(--hard); color: var(--hard);">💀 Supervivencia</button>
             <button class="btn-choice shop-btn" onclick="showScreen('screen-shop')">🛒 Tienda</button>
+        </div>
+    </div>
+
+    <div id="wheel-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeWheelModal()">×</button>
+            
+            <h2>🎰 Ruleta de Premios</h2>
+            
+            <div class="wheel-container">
+                <div class="wheel-wrapper">
+                    <div class="wheel-pointer"></div>
+                    <div id="main-wheel" class="wheel"></div>
+                </div>
+                <button id="spin-btn" class="btn-choice" onclick="spinWheel()">¡GIRAR AHORA!</button>
+                <p id="wheel-timer"></p>
+            </div>
         </div>
     </div>
 
@@ -45,18 +78,16 @@
     <div id="screen-game" class="screen">
         <div class="game-header-grid">
             <div id="lives-container">❤️❤️❤️</div>
+            <div id="timer-display" style="font-weight: bold; font-size: 1.2rem;">⏱️ 15s</div>
             <div id="score">0</div>
             <div class="status-right">
                 <div id="combo-badge">x1.0</div>
                 <span id="shield-indicator" style="display:none">🛡️</span>
             </div>
         </div>
-
         <div id="logo-area" class="img-container"></div>
         <h3 id="question-text">Cargando...</h3>
-        
         <div id="options-area"></div> 
-        
         <div id="error-feedback" class="feedback-box"></div>
     </div>
 
@@ -65,7 +96,6 @@
             <h2>🛒 Tienda de Poderes</h2>
             <p>Mejora tus posibilidades de ganar</p>
         </div>
-        
         <div class="shop-container">
             <div class="shop-item" onclick="buyPowerUp('shield')">
                 <div class="item-info">
@@ -74,7 +104,6 @@
                 </div>
                 <div class="item-price-tag">500 💰</div>
             </div>
-
             <div class="shop-item" onclick="buyPowerUp('half')">
                 <div class="item-info">
                     <span class="item-title">🌓 Filtro 50/50</span>
@@ -83,7 +112,6 @@
                 <div class="item-price-tag">300 💰</div>
             </div>
         </div>
-
         <button class="back-btn" onclick="showScreen('screen-modes')">Volver al Menú</button>
     </div>
 

@@ -370,3 +370,214 @@ body.dark-mode .item-price-tag { background: var(--primary); }
 .screen.active { display: flex !important; animation: fadeIn 0.4s ease forwards; }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* --- NOTIFICACIÓN DE LOGRO --- */
+.achievement-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: linear-gradient(135deg, #f1c40f, #e67e22);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 50px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 9999;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 2px solid white;
+}
+
+.achievement-notification.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+.achievement-icon { font-size: 2rem; }
+.achievement-text b { display: block; font-size: 1.1rem; }
+
+/* --- EFECTO CRONÓMETRO --- */
+#timer-display {
+    font-size: 1.2rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.timer-low {
+    color: #ff4757 !important;
+    animation: blink-timer 0.5s infinite alternate;
+    transform: scale(1.2);
+}
+
+@keyframes blink-timer {
+    from { opacity: 1; }
+    to { opacity: 0.5; }
+}
+
+/* --- ESTILOS DE LA RULETA --- */
+.wheel-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+.wheel {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    border: 8px solid var(--gold);
+    position: relative;
+    transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+    background: conic-gradient(
+        #f1c40f 0deg 60deg, #e67e22 60deg 120deg, 
+        #f1c40f 120deg 180deg, #e67e22 180deg 240deg, 
+        #f1c40f 240deg 300deg, #e67e22 300deg 360deg
+    );
+    box-shadow: 0 0 30px rgba(241, 196, 15, 0.3);
+}
+
+/* Indicador de la ruleta */
+.wheel-wrapper {
+    position: relative; /* Muy importante para que la flecha se pegue aquí */
+    display: inline-block;
+    margin: 20px 0;
+}
+
+.wheel-pointer {
+    position: absolute;
+    top: -15px; /* Ajusta este valor para que la punta toque la ruleta */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; 
+    height: 0; 
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 25px solid #ff4757; /* Color de la flecha roja */
+    z-index: 10;
+}
+
+.wheel-btn {
+    padding: 12px 30px;
+    background: var(--gold);
+    color: #000;
+    font-weight: bold;
+    border-radius: 25px;
+    cursor: pointer;
+}
+
+.wheel-btn:disabled {
+    background: #555;
+    cursor: not-allowed;
+}
+
+/* Estilo del "Anuncio" */
+.daily-ads-container {
+    background: linear-gradient(135deg, #818cf8, #c084fc); /* Colores suaves como tu imagen */
+    border-radius: 15px;
+    padding: 20px;
+    margin: 25px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    width: 90%;
+    max-width: 450px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.daily-ads-container:hover {
+    transform: translateY(-2px);
+}
+
+/* --- DISTINTIVO "GIFT" (ESTILO ETIQUETA) --- */
+.ads-badge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #f87171; /* Rojo suave */
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 4px 12px;
+    border-bottom-right-radius: 12px;
+    border-top-left-radius: 12px;
+    letter-spacing: 1px;
+}
+
+/* --- CONTENIDO INTERNO --- */
+.ads-content {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Espacio generoso entre icono y texto */
+}
+
+.ads-icon-wrapper {
+    font-size: 2.8rem; /* Tamaño grande para el emoji */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.ads-text {
+    display: flex;
+    flex-direction: column;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.ads-text b {
+    font-size: 1.2rem;
+    margin-bottom: 2px;
+}
+
+.ads-text small {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* --- CENTRADO DEL MODAL --- */
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.9); /* Fondo oscuro azulado */
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(8px);
+}
+
+.modal-content {
+    background: #1e293b;
+    padding: 40px;
+    border-radius: 24px;
+    position: relative;
+    width: 90%;
+    max-width: 380px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
