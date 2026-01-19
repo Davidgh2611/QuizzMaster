@@ -1,196 +1,158 @@
-// --- VARIABLES DE ESTADO ---
-let selectedMode = '';
-let selectedDiff = '';
-let quizSet = [];
-let currentIndex = 0;
-let points = 0;
-let streak = 0; 
-let lives = 3;
+// --- ESTADO ---
+let selectedMode = '', selectedDiff = '', quizSet = [], currentIndex = 0;
+let points = 0, streak = 0, lives = 3;
 
 // --- PERSISTENCIA ---
 let highScore = parseInt(localStorage.getItem('highScore')) || 0;
 let totalPoints = parseInt(localStorage.getItem('totalPoints')) || 0;
-let unlockedLogros = JSON.parse(localStorage.getItem('logros')) || [];
 let inventory = JSON.parse(localStorage.getItem('inventory')) || { shield: 0, half: 0 };
 
-// Inicialización
-if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
-window.onload = () => {
-    document.getElementById('high-score-display').innerText = `Récord: ${highScore}`;
-    document.getElementById('total-currency-display').innerText = `💰 ${totalPoints}`;
-    unlockedLogros.forEach(l => {
-        const medal = document.getElementById(`medal-${l.replace('_', '-')}`);
-        if(medal) medal.classList.add('unlocked');
-    });
-};
-
-// --- NAVEGACIÓN ---
-function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => {
-        s.classList.remove('active');
-        s.style.display = 'none'; 
-    });
-    const target = document.getElementById(id);
-    if (target) {
-        target.classList.add('active');
-        target.style.display = 'flex'; 
-    }
-    if(id === 'screen-shop') updateShopUI();
+// Al cargar, aplicar modo oscuro si estaba guardado
+if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('dark-mode');
 }
 
-// --- JUEGO ---
-function selectMode(m) {
-    selectedMode = m;
-    showScreen('screen-diffs');
-    document.getElementById('mode-title').innerText = `Modo ${m.toUpperCase()}`;
+function updateUI() {
+    // Elementos de la cabecera global
+    const highScoreEl = document.getElementById('high-score-display');
+    const totalCurrencyEl = document.getElementById('total-currency-display');
+    if(highScoreEl) highScoreEl.innerText = `Récord: ${highScore}`;
+    if(totalCurrencyEl) totalCurrencyEl.innerText = `💰 ${totalPoints}`;
+
+    // Elementos de la pantalla de juego
+    const scoreEl = document.getElementById('score');
+    const livesEl = document.getElementById('lives-container');
+    const comboEl = document.getElementById('combo-badge');
+    const shieldInd = document.getElementById('shield-indicator');
+
+    if (scoreEl) scoreEl.innerText = points;
+    if (livesEl) livesEl.innerText = "❤️".repeat(Math.max(0, lives));
+    
+    if (comboEl) {
+        const val = (1 + (streak * 0.1)).toFixed(1);
+        comboEl.innerText = `x${val}`;
+        streak >= 3 ? comboEl.classList.add('combo-active') : comboEl.classList.remove('combo-active');
+    }
+
+    if (shieldInd) {
+        shieldInd.style.display = inventory.shield > 0 ? 'block' : 'none';
+        shieldInd.innerText = `🛡️ x${inventory.shield}`;
+    }
+}
+
+function selectMode(m) { 
+    selectedMode = m; 
+    // Animación visual al título de dificultad
+    const titles = { 'logos': '🖼️ Solo Logos', 'trivia': '📚 Solo Trivia', 'mixto': '🔥 Modo Mixto' };
+    document.getElementById('mode-title').innerText = titles[m] || 'Dificultad';
+    showScreen('screen-diffs'); 
 }
 
 function selectDifficulty(d) {
-    selectedDiff = d;
+    // Normalizamos la dificultad para evitar errores de tildes (facil vs fácil)
+    selectedDiff = d.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    
+    // Filtrar preguntas
     quizSet = questionsDB.filter(q => {
-        const modeMatch = (selectedMode === 'mixto') ? true : (q.mode === selectedMode);
-        return modeMatch && (q.difficulty === selectedDiff);
+        const qDiff = q.difficulty.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const modeMatch = (selectedMode === 'mixto' || q.mode === selectedMode);
+        return modeMatch && qDiff === selectedDiff;
     });
 
     if (quizSet.length === 0) {
-        alert("No hay preguntas disponibles para esta selección.");
+        alert("¡Ups! No hay preguntas disponibles para esta combinación.");
         showScreen('screen-modes');
         return;
     }
 
     quizSet.sort(() => Math.random() - 0.5);
     points = 0; currentIndex = 0; lives = 3; streak = 0;
+    
     showScreen('screen-game');
     renderQuestion();
 }
 
 function renderQuestion() {
     const q = quizSet[currentIndex];
+    updateUI();
     
-    // Actualización visual de estado inicial de la pregunta
-    document.getElementById('score').innerText = points;
-    document.getElementById('lives-container').innerText = "❤️".repeat(lives);
-    updateComboUI(); 
-
-    const sInd = document.getElementById('shield-indicator');
-    sInd.style.display = inventory.shield > 0 ? 'inline' : 'none';
-    sInd.innerText = `🛡️x${inventory.shield}`;
-
-    document.getElementById('progress-bar').style.width = `${(currentIndex / quizSet.length) * 100}%`;
+    const progress = document.getElementById('progress-bar');
+    if(progress) progress.style.width = `${(currentIndex / quizSet.length) * 100}%`;
+    
     document.getElementById('question-text').innerText = q.q;
-
+    
     const logoArea = document.getElementById('logo-area');
-    logoArea.innerHTML = q.img ? `<img src="${q.img}">` : '';
+    logoArea.innerHTML = q.img ? `<img src="${q.img}" alt="Logo">` : '';
     logoArea.style.display = q.img ? 'flex' : 'none';
 
     const optArea = document.getElementById('options-area');
     optArea.innerHTML = '';
-    
+
+    // Lógica 50/50: Se muestra solo si el usuario tiene el item
     if (inventory.half > 0) {
-        const halfBtn = document.createElement('button');
-        halfBtn.className = 'btn-choice';
-        halfBtn.style.padding = "10px";
-        halfBtn.innerText = `🌓 50/50 (${inventory.half})`;
-        halfBtn.onclick = function() { useHalfHalf(this); };
-        optArea.appendChild(halfBtn);
+        const hBtn = document.createElement('button');
+        hBtn.className = 'opt-btn'; 
+        hBtn.style.gridColumn = "span 2";
+        hBtn.style.background = "var(--bg-input)";
+        hBtn.innerHTML = `🌓 Usar 50/50 (Quedan: ${inventory.half})`;
+        hBtn.onclick = () => {
+            inventory.half--;
+            const correctIdx = q.correct;
+            const btns = document.querySelectorAll('.opt-btn:not(:first-child)'); // Excluye el botón 50/50
+            let removed = 0;
+            let indices = [0, 1, 2, 3].filter(idx => idx !== correctIdx);
+            indices.sort(() => Math.random() - 0.5);
+            
+            const allOptionBtns = optArea.querySelectorAll('.opt-btn-choice');
+            indices.slice(0, 2).forEach(idx => {
+                allOptionBtns[idx].style.opacity = '0.2';
+                allOptionBtns[idx].disabled = true;
+            });
+            hBtn.remove();
+            saveData();
+            updateUI();
+        };
+        optArea.appendChild(hBtn);
     }
 
     q.options.forEach((opt, i) => {
         const btn = document.createElement('button');
-        btn.className = 'opt-btn';
+        btn.className = 'opt-btn opt-btn-choice';
         btn.innerText = opt;
-        btn.onclick = () => validate(i, btn);
+        btn.onclick = () => {
+            document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+            if (i === q.correct) {
+                btn.classList.add('correct');
+                streak++;
+                // Puntos extra por dificultad
+                const basePoints = selectedDiff === 'facil' ? 50 : (selectedDiff === 'medio' ? 100 : 200);
+                points += Math.round(basePoints * (1 + streak * 0.1));
+            } else {
+                if (inventory.shield > 0) {
+                    inventory.shield--;
+                    btn.classList.add('wrong');
+                    // Breve feedback visual del escudo
+                    const shieldInd = document.getElementById('shield-indicator');
+                    shieldInd.style.transform = "scale(2)";
+                    setTimeout(() => shieldInd.style.transform = "scale(1)", 500);
+                } else {
+                    btn.classList.add('wrong');
+                    streak = 0;
+                    lives--;
+                }
+                document.querySelectorAll('.opt-btn-choice')[q.correct].classList.add('correct');
+            }
+            saveData();
+            updateUI();
+            
+            setTimeout(() => {
+                currentIndex++;
+                if (lives > 0 && currentIndex < quizSet.length) renderQuestion();
+                else finish();
+            }, 1200);
+        };
         optArea.appendChild(btn);
     });
-}
-
-// --- Lógica de validación ---
-function validate(selected, btn) {
-    const q = quizSet[currentIndex];
-    const app = document.getElementById('app');
-    const buttons = document.querySelectorAll('.opt-btn');
-    buttons.forEach(b => b.disabled = true);
-
-    if (selected === q.correct) {
-        btn.classList.add('correct');
-        streak++;
-        
-        let basePoints = (selectedDiff === 'fácil' ? 50 : (selectedDiff === 'medio' ? 100 : 200));
-        let multiplier = (1 + (streak * 0.1));
-        let pointsEarned = Math.round(basePoints * multiplier);
-        
-        points += pointsEarned;
-        
-        // ACTUALIZACIÓN VISUAL INMEDIATA
-        document.getElementById('score').innerText = points; 
-        updateComboUI(); 
-        showFloatingText(btn, `+${pointsEarned}`);
-    } else {
-        app.classList.add('shake-animation');
-        setTimeout(() => app.classList.remove('shake-animation'), 400);
-        
-        if (inventory.shield > 0) {
-            inventory.shield--;
-            saveData();
-            btn.classList.add('wrong');
-            // Al usar escudo mantenemos el streak o lo bajamos según prefieras, 
-            // aquí lo mantengo para no penalizar tanto al usar un ítem caro.
-        } else {
-            btn.classList.add('wrong');
-            streak = 0;
-            lives--;
-            updateComboUI(); 
-        }
-        buttons[q.correct].classList.add('correct');
-    }
-
-    // Actualizar corazones visualmente
-    document.getElementById('lives-container').innerText = "❤️".repeat(lives);
-
-    setTimeout(() => {
-        if (lives <= 0) {
-            finish();
-        } else {
-            currentIndex++;
-            if (currentIndex < quizSet.length) {
-                renderQuestion();
-            } else {
-                finish();
-            }
-        }
-    }, 1500);
-}
-
-// --- Multiplicador formateado ---
-function updateComboUI() {
-    const badge = document.getElementById('combo-badge');
-    if(!badge) return;
-    // Forzamos siempre un decimal (ej: 1.0, 1.1, 1.2)
-    const val = (1 + (streak * 0.1)).toFixed(1); 
-    badge.innerText = `x${val}`;
-    
-    if (streak >= 3) {
-        badge.classList.add('combo-active');
-    } else {
-        badge.classList.remove('combo-active');
-    }
-}
-
-// --- UTILIDADES ---
-function useHalfHalf(btn) {
-    if(inventory.half <= 0) return;
-    inventory.half--;
-    const correct = quizSet[currentIndex].correct;
-    const opts = document.querySelectorAll('.opt-btn');
-    let removed = 0;
-    opts.forEach((o, i) => {
-        if (i !== correct && removed < 2) {
-            o.style.visibility = 'hidden';
-            removed++;
-        }
-    });
-    btn.style.display = 'none';
-    saveData();
 }
 
 function buyPowerUp(type) {
@@ -199,17 +161,44 @@ function buyPowerUp(type) {
         totalPoints -= price;
         inventory[type]++;
         saveData();
-        updateShopUI();
+        updateUI();
+        // Feedback visual en lugar de alert soso
+        console.log(`Comprado: ${type}`);
     } else {
-        alert("Puntos insuficientes");
+        alert("Necesitas más monedas 💰");
     }
 }
 
-function updateShopUI() {
-    const shopPts = document.getElementById('total-points-shop');
-    const headerPts = document.getElementById('total-currency-display');
-    if(shopPts) shopPts.innerText = totalPoints;
-    if(headerPts) headerPts.innerText = `💰 ${totalPoints}`;
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+    });
+    const target = document.getElementById(id);
+    if (target) {
+        target.classList.add('active');
+        target.style.display = 'flex';
+    }
+    updateUI();
+}
+
+function saveData() {
+    localStorage.setItem('totalPoints', totalPoints);
+    localStorage.setItem('highScore', highScore);
+    localStorage.setItem('inventory', JSON.stringify(inventory));
+}
+
+function finish() {
+    totalPoints += points;
+    if (points > highScore) { 
+        highScore = points; 
+        document.getElementById('new-record-msg').style.display = 'block'; 
+    } else {
+        document.getElementById('new-record-msg').style.display = 'none';
+    }
+    saveData();
+    document.getElementById('final-points').innerText = points;
+    showScreen('screen-end');
 }
 
 function toggleDarkMode() {
@@ -217,30 +206,6 @@ function toggleDarkMode() {
     localStorage.setItem('darkMode', isDark);
 }
 
-function saveData() {
-    localStorage.setItem('totalPoints', totalPoints);
-    localStorage.setItem('highScore', highScore);
-    localStorage.setItem('inventory', JSON.stringify(inventory));
-    localStorage.setItem('logros', JSON.stringify(unlockedLogros));
-}
-
-function finish() {
-    totalPoints += points;
-    if (points > highScore) {
-        highScore = points;
-        const msg = document.getElementById('new-record-msg');
-        if(msg) msg.style.display = 'block';
-    }
-    saveData();
-    const finalPts = document.getElementById('final-points');
-    if(finalPts) finalPts.innerText = points;
-    showScreen('screen-end');
-}
-
-function showFloatingText(target, text) {
-    const el = document.createElement('div');
-    el.className = 'floating-points';
-    el.innerText = text;
-    target.appendChild(el);
-    setTimeout(() => el.remove(), 800);
-}
+window.onload = () => {
+    updateUI();
+};

@@ -28,49 +28,73 @@
             <button class="btn-choice" onclick="selectMode('logos')">🖼️ Solo Logos</button>
             <button class="btn-choice" onclick="selectMode('trivia')">📚 Solo Trivia</button>
             <button class="btn-choice" onclick="selectMode('mixto')">🔥 Modo Mixto</button>
-            <button class="btn-choice" style="background: #f1c40f; color: black;" onclick="showScreen('screen-shop')">🛒 Tienda</button>
+            <button class="btn-choice shop-btn" onclick="showScreen('screen-shop')">🛒 Tienda</button>
         </div>
     </div>
 
     <div id="screen-diffs" class="screen">
-        <h2 id="mode-title">Seleccionar Dificultad</h2>
-        <div class="btn-group">
-            <button class="btn-choice" onclick="selectDifficulty('fácil')">🟢 Fácil</button>
-            <button class="btn-choice" onclick="selectDifficulty('medio')">🟠 Medio</button>
-            <button class="btn-choice" onclick="selectDifficulty('difícil')">🔴 Difícil</button>
-            <button class="btn-choice" style="background: var(--dark); color: white;" onclick="showScreen('screen-modes')">Volver</button>
-        </div>
-    </div>
-
-    <div id="screen-shop" class="screen">
-        <h2>🛒 Tienda</h2>
-        <p>Puntos: <strong id="total-points-shop">0</strong></p>
-        <div class="btn-group">
-            <button class="btn-choice" onclick="buyPowerUp('shield')">🛡️ Escudo (500 pts)</button>
-            <button class="btn-choice" onclick="buyPowerUp('half')">🌓 50/50 (300 pts)</button>
-            <button class="btn-choice" style="background: var(--dark); color: white;" onclick="showScreen('screen-modes')">Volver</button>
+        <h2 id="mode-title">Dificultad</h2>
+        <div class="difficulty-container">
+            <button class="btn-diff easy-opt" onclick="selectDifficulty('fácil')">🟢 Fácil</button>
+            <button class="btn-diff medium-opt" onclick="selectDifficulty('medio')">🟠 Medio</button>
+            <button class="btn-diff hard-opt" onclick="selectDifficulty('difícil')">🔴 Difícil</button>
+            <button class="btn-diff" onclick="showScreen('screen-modes')">Volver</button>
         </div>
     </div>
 
     <div id="screen-game" class="screen">
-        <div class="meta-info">
-            <div id="lives-container" class="hearts-red">❤️❤️❤️</div>
-            <div id="powerups-active"><span id="shield-indicator" style="display:none"></span></div>
-            <div id="combo-badge">x1.0</div>
-            <span id="score">0</span>
+        <div class="game-header-grid">
+            <div id="lives-container">❤️❤️❤️</div>
+            <div id="score">0</div>
+            <div class="status-right">
+                <div id="combo-badge">x1.0</div>
+                <span id="shield-indicator" style="display:none">🛡️</span>
+            </div>
         </div>
-        <div class="progress-container"><div id="progress-bar"></div></div>
+
         <div id="logo-area" class="img-container"></div>
-        <h3 id="question-text">Pregunta...</h3>
-        <div id="options-area" class="opt-grid"></div>
+        <h3 id="question-text">Cargando...</h3>
+        
+        <div id="options-area"></div> 
+        
         <div id="error-feedback" class="feedback-box"></div>
     </div>
 
+    <div id="screen-shop" class="screen">
+        <div class="shop-header">
+            <h2>🛒 Tienda de Poderes</h2>
+            <p>Mejora tus posibilidades de ganar</p>
+        </div>
+        
+        <div class="shop-container">
+            <div class="shop-item" onclick="buyPowerUp('shield')">
+                <div class="item-info">
+                    <span class="item-title">🛡️ Escudo Protector</span>
+                    <span class="item-subtitle">Evita perder una vida en un fallo</span>
+                </div>
+                <div class="item-price-tag">500 💰</div>
+            </div>
+
+            <div class="shop-item" onclick="buyPowerUp('half')">
+                <div class="item-info">
+                    <span class="item-title">🌓 Filtro 50/50</span>
+                    <span class="item-subtitle">Elimina dos opciones incorrectas</span>
+                </div>
+                <div class="item-price-tag">300 💰</div>
+            </div>
+        </div>
+
+        <button class="back-btn" onclick="showScreen('screen-modes')">Volver al Menú</button>
+    </div>
+
     <div id="screen-end" class="screen">
-        <h1>¡Fin del Juego!</h1>
-        <h1 id="final-points" style="font-size: 3.5rem; color: var(--primary);">0</h1>
-        <div id="new-record-msg" style="display:none; color: var(--easy);">¡NUEVO RÉCORD!</div>
-        <button class="btn-choice" style="background: var(--dark); color: white;" onclick="location.reload()">🎮 Inicio</button>
+        <h1>¡Juego Terminado!</h1>
+        <div class="result-circle">
+            <span id="final-points">0</span>
+            <small>PUNTOS</small>
+        </div>
+        <div id="new-record-msg" style="display:none;">🏆 ¡NUEVO RÉCORD!</div>
+        <button class="btn-choice restart-btn" onclick="location.reload()">🎮 Jugar de Nuevo</button>
     </div>
 </div>
 
