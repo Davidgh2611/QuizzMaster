@@ -5,12 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Quiz Master Pro</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* CSS necesario para mantener la simetría perfecta */
+        .header-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .nav-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: inherit;
+            padding: 5px 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .dark-mode .nav-button {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* REPARACIÓN DE LA CUADRÍCULA DE JUEGO */
+        .game-header-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr; /* Tres columnas: laterales flexibles, centro fijo */
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        #lives-container {
+            justify-self: start; /* Vidas siempre a la izquierda */
+            display: flex;
+            gap: 2px;
+        }
+
+        .center-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-self: center; /* Cronómetro y puntos siempre al centro */
+        }
+
+        .status-right {
+            justify-self: end; /* Combo y escudo siempre a la derecha */
+            text-align: right;
+        }
+
+        #timer-display {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        #score {
+            font-size: 2.5rem;
+            line-height: 1;
+            font-weight: bold;
+            color: #f1c40f;
+        }
+    </style>
 </head>
 <body>
 
 <div id="app">
     <div class="global-header">
-        <button id="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
+        <div class="header-controls">
+            <button id="dark-mode-toggle" class="nav-button" onclick="toggleDarkMode()">🌙</button>
+            <button id="home-btn" class="nav-button" onclick="location.reload()" style="display: none;">🏠 Inicio</button>
+        </div>
         <div id="user-stats-header">
             <span id="high-score-display">Récord: 0</span> | 
             <span id="total-currency-display">💰 0</span>
@@ -29,9 +97,7 @@
         <div class="daily-ads-container" onclick="openWheelModal()">
             <div class="ads-badge">GIFT</div>
             <div class="ads-content">
-                <div class="ads-icon-wrapper">
-                    <span class="ads-icon">🎰</span>
-                </div>
+                <div class="ads-icon-wrapper"><span class="ads-icon">🎰</span></div>
                 <div class="ads-text">
                     <b>¡Giro Diario Gratis!</b>
                     <small id="wheel-status-text">Disponible ahora</small>
@@ -51,9 +117,7 @@
     <div id="wheel-modal" class="modal-overlay">
         <div class="modal-content">
             <button class="close-modal" onclick="closeWheelModal()">×</button>
-            
             <h2>🎰 Ruleta de Premios</h2>
-            
             <div class="wheel-container">
                 <div class="wheel-wrapper">
                     <div class="wheel-pointer"></div>
@@ -78,13 +142,18 @@
     <div id="screen-game" class="screen">
         <div class="game-header-grid">
             <div id="lives-container">❤️❤️❤️</div>
-            <div id="timer-display" style="font-weight: bold; font-size: 1.2rem;">⏱️ 15s</div>
-            <div id="score">0</div>
+            
+            <div class="center-info">
+                <div id="timer-display">⏱️ 15s</div>
+                <div id="score">0</div>
+            </div>
+
             <div class="status-right">
                 <div id="combo-badge">x1.0</div>
                 <span id="shield-indicator" style="display:none">🛡️</span>
             </div>
         </div>
+
         <div id="logo-area" class="img-container"></div>
         <h3 id="question-text">Cargando...</h3>
         <div id="options-area"></div> 

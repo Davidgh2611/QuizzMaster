@@ -13,8 +13,17 @@ let inventory = JSON.parse(localStorage.getItem('inventory')) || { shield: 0, ha
 let achievements = JSON.parse(localStorage.getItem('achievements')) || { medal1: false, medal2: false, medal3: false };
 let lastSpin = localStorage.getItem('lastSpin') || 0;
 
+// Inicialización de Modo Oscuro al cargar
 if (localStorage.getItem('darkMode') === 'true') {
     document.body.classList.add('dark-mode');
+}
+
+// --- FUNCIÓN MODO OSCURO (CORREGIDA) ---
+function toggleDarkMode() {
+    const isDark = document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', isDark);
+    const btn = document.getElementById('dark-mode-toggle');
+    if (btn) btn.innerText = isDark ? '☀️' : '🌙';
 }
 
 // --- FUNCIÓN DE TRADUCCIÓN ---
@@ -219,6 +228,14 @@ function updateUI() {
         shieldInd.style.display = inventory.shield > 0 ? 'block' : 'none';
         shieldInd.innerText = `🛡️ x${inventory.shield}`;
     }
+
+    // Gestionar visibilidad del botón de inicio en la cabecera
+    const homeBtn = document.getElementById('home-btn');
+    if (homeBtn) {
+        const isMainMenu = document.getElementById('screen-modes').classList.contains('active');
+        homeBtn.style.display = isMainMenu ? 'none' : 'flex';
+    }
+
     checkAchievements();
     checkWheelCooldown();
 }
@@ -247,7 +264,8 @@ async function fetchAPIData(amount = 10, difficulty = 'medium') {
 function selectMode(m) { 
     selectedMode = m; 
     const titles = { 'logos': '🖼️ Solo Logos', 'trivia': '📚 Solo Trivia', 'mixto': '🔥 Modo Mixto', 'paises': '🌍 Solo Países' };
-    document.getElementById('mode-title').innerText = titles[m] || 'Dificultad';
+    const titleEl = document.getElementById('mode-title');
+    if(titleEl) titleEl.innerText = titles[m] || 'Dificultad';
     showScreen('screen-diffs'); 
 }
 
@@ -281,8 +299,9 @@ function renderQuestion() {
     document.getElementById('question-text').innerText = q.q;
     
     const logoArea = document.getElementById('logo-area');
-    logoArea.innerHTML = q.img ? `<img src="${q.img}" alt="Pregunta" style="max-height: 150px; border-radius: 10px;">` : '';
-    logoArea.style.display = q.img ? 'flex' : 'none';
+    // Fondo blanco para que los logos se vean bien en modo oscuro
+    logoArea.innerHTML = q.img ? `<img src="${q.img}" alt="Pregunta" style="max-width: 150px; max-height: 120px; border-radius: 8px; display: block; margin: 0 auto; background: white; padding: 10px;">` : '';
+    logoArea.style.display = q.img ? 'block' : 'none';
 
     const optArea = document.getElementById('options-area');
     optArea.innerHTML = '';
@@ -371,4 +390,8 @@ function finish() {
     showScreen('screen-end');
 }
 
-window.onload = () => { updateUI(); };
+window.onload = () => { 
+    updateUI();
+    const btn = document.getElementById('dark-mode-toggle');
+    if (btn) btn.innerText = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+};
