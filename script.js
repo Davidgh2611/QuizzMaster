@@ -131,14 +131,16 @@ function renderSubModeMenu(mode) {
 }
 
 async function selectDifficulty(d) {
-    selectedDiff = d.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    // 1. Normalizar y guardar la dificultad elegida
+    selectedDiff = d.toLowerCase().normalize("NFD").replace(/[\u0300//u036f]/g, "");
     showScreen('screen-game');
-    document.getElementById('question-text').innerText = "Cargando preguntas...";
+    document.getElementById('question-text').innerText = "Filtrando desafíos...";
 
     let rawData = null;
     let tempPool = [];
     let selectedForMatch = [];
 
+    // 2. Carga de archivos según el modo
     if (selectedMode === 'logos') {
         rawData = await loadJSON('logos');
         tempPool = (selectedSubMode === 'todos') ? Object.values(rawData).flat() : (rawData[selectedSubMode] || []);
@@ -152,42 +154,34 @@ async function selectDifficulty(d) {
         tempPool = (selectedSubMode === 'todos') ? Object.values(rawData).flat() : (rawData[selectedSubMode] || []);
     }
     else if (selectedMode === 'mixto') {
-        const [dbLogos, dbPaises, dbTrivia] = await Promise.all([
-            loadJSON('logos'),
-            loadJSON('paises'),
-            loadJSON('trivia')
-        ]);
+        const [dbL, dbP, dbT] = await Promise.all([loadJSON('logos'), loadJSON('paises'), loadJSON('trivia')]);
+        
+        // En modo mixto, filtramos cada pool por la dificultad elegida antes de mezclar
+        const filterDiff = (list) => list.filter(item => item.d === selectedDiff || !item.d);
+        
+        const pL = filterDiff(Object.values(dbL).flat());
+        const pP = filterDiff(Object.values(dbP).flat());
+        const pT = filterDiff(Object.values(dbT).flat());
 
-        const poolLogos = Object.values(dbLogos).flat();
-        const poolPaises = Object.values(dbPaises).flat();
-        const poolTrivia = Object.values(dbTrivia).flat();
-
-        // Generamos las preguntas mezcladas directamente aquí
-        for(let i=0; i<4; i++) {
-            let item = poolLogos[Math.floor(Math.random() * poolLogos.length)];
-            selectedForMatch.push(generateLogoQuestionFromData(item, poolLogos));
-        }
-        for(let i=0; i<3; i++) {
-            let item = poolPaises[Math.floor(Math.random() * poolPaises.length)];
-            selectedForMatch.push(generateFlagQuestionFromData(item, poolPaises));
-        }
-        for(let i=0; i<3; i++) {
-            let item = poolTrivia[Math.floor(Math.random() * poolTrivia.length)];
-            selectedForMatch.push(item);
-        }
+        for(let i=0; i<4; i++) selectedForMatch.push(generateLogoQuestionFromData(pL[Math.floor(Math.random()*pL.length)], pL));
+        for(let i=0; i<3; i++) selectedForMatch.push(generateFlagQuestionFromData(pP[Math.floor(Math.random()*pP.length)], pP));
+        for(let i=0; i<3; i++) selectedForMatch.push(pT[Math.floor(Math.random()*pT.length)]);
         
         quizSet = shuffleArray(selectedForMatch);
     }
 
-    // Solo ejecutamos la lógica de pool estándar si NO es modo mixto 
-    // (porque el mixto ya generó su propio selectedForMatch arriba)
+    // 3. Aplicar Filtro de Dificultad para modos individuales
     if (selectedMode !== 'mixto') {
-        if (!tempPool || tempPool.length === 0) {
-            alert("Error: No se pudieron cargar las preguntas.");
-            showScreen('screen-modes');
-            return;
+        // Filtramos: que coincida la dificultad O que no tenga dificultad definida (como respaldo)
+        let filteredPool = tempPool.filter(item => item.d === selectedDiff);
+
+        // RESPALDO: Si no hay suficientes preguntas de esa dificultad, usamos el pool general
+        if (filteredPool.length < 5) {
+            console.warn(`Pocas preguntas para nivel ${selectedDiff}, usando pool general.`);
+            filteredPool = tempPool; 
         }
-        availableQuestionsPool = shuffleArray([...tempPool]);
+
+        availableQuestionsPool = shuffleArray([...filteredPool]);
         const picked = availableQuestionsPool.splice(0, 10);
         
         quizSet = picked.map(item => {
@@ -200,7 +194,6 @@ async function selectDifficulty(d) {
     points = 0; currentIndex = 0; lives = 3; streak = 0;
     renderQuestion();
 }
-
 function renderQuestion() {
     const q = quizSet[currentIndex];
     updateUI();
@@ -265,19 +258,35 @@ function renderQuestion() {
 // --- SISTEMA DE TIEMPO ---
 function startTimer() {
     clearInterval(timerInterval);
-    timeLeft = 15;
+
+    // --- AJUSTE DE TIEMPO POR DIFICULTAD ---
+    if (selectedDiff === 'facil') {
+        timeLeft = 25; // Más tiempo para leer
+    } else if (selectedDiff === 'medio') {
+        timeLeft = 15; // Tiempo estándar
+    } else if (selectedDiff === 'dificil') {
+        timeLeft = 8;  // Reto máximo: menos de 10 segundos
+    } else {
+        timeLeft = 15; // Respaldo por si acaso
+    }
+
     const timerEl = document.getElementById('timer-display');
     if (timerEl) {
         timerEl.innerText = `⏱️ ${timeLeft}s`;
         timerEl.classList.remove('timer-low');
     }
+
     timerInterval = setInterval(() => {
         timeLeft--;
         if (timerEl) {
             timerEl.innerText = `⏱️ ${timeLeft}s`;
-            if (timeLeft <= 5) timerEl.classList.add('timer-low');
+            // Cambiamos el aviso visual según la dificultad (umbral del 30%)
+            if (timeLeft <= 4) timerEl.classList.add('timer-low');
         }
-        if (timeLeft <= 0) { clearInterval(timerInterval); handleTimeout(); }
+        if (timeLeft <= 0) { 
+            clearInterval(timerInterval); 
+            handleTimeout(); 
+        }
     }, 1000);
 }
 
