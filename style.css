@@ -183,25 +183,73 @@ body {
 .grad-dep   { background: linear-gradient(135deg, #1d976c, #93f9b9); --glow-color: #1d976c; }
 .grad-all   { background: linear-gradient(135deg, #6366f1, #a855f7); --glow-color: #6366f1; }
 
-/* --- ÁREA DE JUEGO --- */
+/* --- ÁREA DE JUEGO (REDISEÑO DE MARCADORES) --- */
+.game-header-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+}
+
+#lives-container {
+    font-size: 1.2rem;
+    filter: drop-shadow(0 0 8px var(--hard));
+    letter-spacing: 2px;
+}
+
+.center-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#timer-display {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 5px 15px;
+    border-radius: 12px;
+    border: 1px solid var(--primary);
+    font-weight: 800;
+    font-family: monospace;
+    color: var(--primary);
+    margin-bottom: 8px;
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+}
+
 #score {
-    font-size: 3rem !important;
+    font-size: 3.5rem !important;
+    font-weight: 900;
+    line-height: 1;
     background: linear-gradient(#fff, #94a3b8);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+    filter: drop-shadow(0 0 15px rgba(255,255,255,0.3));
+    margin: 5px 0;
 }
 
-#timer-display {
-    background: var(--glass);
-    padding: 4px 12px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
+#combo-badge {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.8rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
+.status-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+/* --- IMAGEN Y CONTENEDORES --- */
 .img-container {
-    background: white !important; /* Logos se ven mejor sobre blanco */
+    background: white !important;
     height: 180px !important;
     border-radius: 24px !important;
     padding: 15px !important;
@@ -303,7 +351,6 @@ body {
     overflow: hidden;
 }
 
-/* Animación de entrada escalonada para los items de la tienda */
 .shop-item:nth-child(1) { animation: slideInLeft 0.5s ease backwards 0.1s; }
 .shop-item:nth-child(2) { animation: slideInLeft 0.5s ease backwards 0.2s; }
 
@@ -370,7 +417,7 @@ body {
     border-color: white;
 }
 
-/* --- PANTALLA FINAL "EPIC" --- */
+/* --- PANTALLA FINAL --- */
 #screen-end h1 {
     font-size: 2.2rem;
     font-weight: 900;
@@ -391,7 +438,7 @@ body {
     align-items: center;
     justify-content: center;
     box-shadow: 0 0 30px rgba(99, 102, 241, 0.3), inset 0 0 20px rgba(99, 102, 241, 0.2);
-    animation: float 3s ease-in-out infinite;
+    animation: float 3s ease-in-out infinite, rotateIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @keyframes float {
@@ -429,6 +476,11 @@ body {
     50% { transform: scale(1.1); }
 }
 
+@keyframes rotateIn {
+    from { transform: rotate(-180deg) scale(0); opacity: 0; }
+    to { transform: rotate(0) scale(1); opacity: 1; }
+}
+
 .restart-btn {
     background: white !important;
     color: black !important;
@@ -436,30 +488,6 @@ body {
     padding: 20px !important;
     font-size: 1.2rem !important;
     box-shadow: 0 10px 25px rgba(255,255,255,0.2) !important;
-}
-
-.restart-btn:hover {
-    transform: scale(1.05) !important;
-    box-shadow: 0 15px 35px rgba(255,255,255,0.3) !important;
-}
-
-/* --- PANTALLA FINAL --- */
-.result-circle {
-    width: 150px;
-    height: 150px;
-    border: 5px solid var(--primary);
-    border-radius: 50%;
-    margin: 20px auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    animation: rotateIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes rotateIn {
-    from { transform: rotate(-180deg) scale(0); opacity: 0; }
-    to { transform: rotate(0) scale(1); opacity: 1; }
 }
 
 /* --- RESPONSIVE --- */
@@ -479,47 +507,64 @@ body {
 }
 
 @keyframes fall {
-    to {
-        transform: translateY(105vh) rotate(720deg);
-    }
+    to { transform: translateY(105vh) rotate(720deg); }
 }
 
-/* Animación de "cascada" para los botones de continente */
+/* --- CONTINENTES Y CATEGORÍAS --- */
+.submode-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 20px 0;
+    width: 100%;
+}
+
+.submode-grid button:nth-child(5) {
+    grid-column: span 2;
+    width: 100%;
+}
+
 .submode-grid .btn-category {
-    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
 }
 
-.submode-grid .btn-category:nth-child(1) { animation-delay: 0.1s; }
-.submode-grid .btn-category:nth-child(2) { animation-delay: 0.15s; }
-.submode-grid .btn-category:nth-child(3) { animation-delay: 0.2s; }
-.submode-grid .btn-category:nth-child(4) { animation-delay: 0.25s; }
-.submode-grid .btn-category:nth-child(5) { animation-delay: 0.3s; }
+@keyframes bounceIn {
+    from { opacity: 0; transform: scale(0.3) translateY(40px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
 
 @keyframes popIn {
-    from { 
-        opacity: 0; 
-        transform: scale(0.5) translateY(30px); 
-    }
-    to { 
-        opacity: 1; 
-        transform: scale(1) translateY(0); 
-    }
-}
-
-/* Efecto de pulso suave en los iconos de los continentes */
-.category-icon {
-    display: inline-block;
-    transition: transform 0.3s ease;
-}
-
-.btn-category:hover .category-icon {
-    animation: iconBounce 0.6s infinite alternate;
+    from { opacity: 0; transform: scale(0.5) translateY(30px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 @keyframes iconBounce {
     from { transform: translateY(0); }
     to { transform: translateY(-10px); }
 }
+
+.category-icon {
+    font-size: 2.8rem;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    transition: transform 0.3s ease;
+}
+
+.btn-category:hover .category-icon {
+    transform: scale(1.2) rotate(5deg);
+    animation: iconBounce 0.6s infinite alternate;
+}
+
+.btn-category::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+    transform: skewX(-25deg);
+    transition: 0.5s;
+}
+
+.btn-category:hover::before { left: 150%; }
 
 /* --- CONTENEDOR DE PARRILLA 2-2-1 --- */
 .submode-grid {
