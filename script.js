@@ -20,12 +20,6 @@ if (localStorage.getItem('darkMode') === 'true') {
 }
 
 // --- UTILIDADES ---
-function toggleDarkMode() {
-    const isDark = document.body.classList.toggle('dark-mode');
-    localStorage.setItem('darkMode', isDark);
-    const btn = document.getElementById('dark-mode-toggle');
-    if (btn) btn.innerText = isDark ? '☀️' : '🌙';
-}
 
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -424,6 +418,28 @@ function finish() {
     saveData();
     if(document.getElementById('final-points')) document.getElementById('final-points').innerText = points;
     showScreen('screen-end');
+    // Dentro de la función finish()
+if (points > highScore) {
+    highScore = points;
+    document.getElementById('new-record-msg').style.display = 'inline-block';
+    
+    // Disparar confeti
+    for(let i = 0; i < 50; i++) {
+        createConfetti();
+    }
+}
+
+function createConfetti() {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + 'vw';
+    confetti.style.backgroundColor = ['#6366f1', '#a855f7', '#f59e0b', '#ef4444', '#10b981'][Math.floor(Math.random() * 5)];
+    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+    confetti.style.opacity = Math.random();
+    document.body.appendChild(confetti);
+    
+    setTimeout(() => confetti.remove(), 5000);
+}
 }
 
 window.onload = () => { 
