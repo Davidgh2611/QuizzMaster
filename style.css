@@ -21,7 +21,7 @@ body.dark-mode {
     --border: #4a5568;
     --bg-input: #1a202c;
 }
-
+ 
 body { 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
     background: var(--bg-body); 

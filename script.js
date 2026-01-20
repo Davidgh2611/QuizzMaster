@@ -2,7 +2,7 @@
 let selectedMode = '', selectedDiff = '', quizSet = [], currentIndex = 0;
 let points = 0, streak = 0, lives = 3;
 let selectedSubMode = ''; // Nueva variable para categorías y continentes
-
+ 
 // VARIABLES DEL CRONÓMETRO
 let timerInterval;
 let timeLeft = 15;
@@ -39,58 +39,26 @@ async function translateText(text) {
     }
 }
 
-// --- BASES DE DATOS AMPLIADAS ---
-const LOGO_DB = {
-    tecnologia: [
-        { name: "Google", domain: "google.com" }, { name: "Apple", domain: "apple.com" },
-        { name: "Microsoft", domain: "microsoft.com" }, { name: "Tesla", domain: "tesla.com" },
-        { name: "Intel", domain: "intel.com" }, { name: "Samsung", domain: "samsung.com" }
-    ],
-    vehiculos: [
-        { name: "BMW", domain: "bmw.com" }, { name: "Mercedes-Benz", domain: "mercedes-benz.com" },
-        { name: "Ferrari", domain: "ferrari.com" }, { name: "Toyota", domain: "toyota.com" },
-        { name: "Audi", domain: "audi.com" }, { name: "Porsche", domain: "porsche.com" }
-    ],
-    comida: [
-        { name: "McDonald's", domain: "mcdonalds.com" }, { name: "Starbucks", domain: "starbucks.com" },
-        { name: "Coca-Cola", domain: "cocacola.com" }, { name: "Burger King", domain: "burgerking.com" },
-        { name: "Pepsi", domain: "pepsi.com" }, { name: "Subway", domain: "subway.com" }
-    ],
-    ropa: [
-        { name: "Nike", domain: "nike.com" }, { name: "Adidas", domain: "adidas.com" },
-        { name: "Zara", domain: "zara.com" }, { name: "Gucci", domain: "gucci.com" },
-        { name: "Puma", domain: "puma.com" }, { name: "H&M", domain: "hm.com" }
-    ]
-};
-
-const COUNTRY_DB = {
-    europa: [
-        { n: "España", c: "es" }, { n: "Francia", c: "fr" }, { n: "Italia", c: "it" },
-        { n: "Alemania", c: "de" }, { n: "Reino Unido", c: "gb" }, { n: "Portugal", c: "pt" }
-    ],
-    america: [
-        { n: "México", c: "mx" }, { n: "Argentina", c: "ar" }, { n: "Brasil", c: "br" },
-        { n: "Estados Unidos", c: "us" }, { n: "Canadá", c: "ca" }, { n: "Chile", c: "cl" }
-    ],
-    asia: [
-        { n: "Japón", c: "jp" }, { n: "China", c: "cn" }, { n: "Corea del Sur", c: "kr" },
-        { n: "India", c: "in" }, { n: "Tailandia", c: "th" }, { n: "Vietnam", c: "vn" }
-    ],
-    africa: [
-        { n: "Egipto", c: "eg" }, { n: "Sudáfrica", c: "za" }, { n: "Marruecos", c: "ma" },
-        { n: "Nigeria", c: "ng" }, { n: "Kenia", c: "ke" }, { n: "Ghana", c: "gh" }
-    ]
-};
+async function loadJSON(filename) {
+    try {
+        const response = await fetch(`${filename}.json`);
+        return await response.json();
+    } catch (error) {
+        console.error(`Error cargando ${filename}.json:`, error);
+        return null;
+    }
+}
 
 // --- GENERADORES DE PREGUNTAS ---
-function generateLogoQuestion() {
+// Modificar: Ahora recibe 'db' como argumento
+function generateLogoQuestion(db) {
     let pool = [];
-    if (LOGO_DB[selectedSubMode]) pool = LOGO_DB[selectedSubMode];
-    else pool = Object.values(LOGO_DB).flat(); // Si es "todos"
+    if (db[selectedSubMode]) pool = db[selectedSubMode];
+    else pool = Object.values(db).flat();
 
     const target = pool[Math.floor(Math.random() * pool.length)];
     let options = [target.name];
-    let allNames = Object.values(LOGO_DB).flat().map(b => b.name);
+    let allNames = Object.values(db).flat().map(b => b.name);
     
     while(options.length < 4) {
         let rand = allNames[Math.floor(Math.random() * allNames.length)];
@@ -98,22 +66,20 @@ function generateLogoQuestion() {
     }
     options.sort(() => Math.random() - 0.5);
 
-    const pubKey = "pk_H_lv-2wxSXabPJG-tvL3lg";
-
     return {
         q: "¿A qué empresa pertenece este logo?",
-        img: `https://img.logo.dev/${target.domain}?token=${pubKey}`,
+        img: `https://img.logo.dev/${target.domain}?token=pk_H_lv-2wxSXabPJG-tvL3lg`,
         options: options,
         correct: options.indexOf(target.name),
-        difficulty: "medio",
         mode: "logos"
     };
 }
 
-function generateFlagQuestion(shuffledList, index) {
+// Modificar: Ahora recibe 'db' para sacar opciones incorrectas
+function generateFlagQuestion(shuffledList, index, db) {
     const target = shuffledList[index];
     let options = [target.n];
-    let allCountries = Object.values(COUNTRY_DB).flat().map(c => c.n);
+    let allCountries = Object.values(db).flat().map(c => c.n);
     
     while(options.length < 4) {
         let rand = allCountries[Math.floor(Math.random() * allCountries.length)];
@@ -125,7 +91,6 @@ function generateFlagQuestion(shuffledList, index) {
         img: `https://flagcdn.com/w320/${target.c}.png`,
         options: options,
         correct: options.indexOf(target.n),
-        difficulty: "facil",
         mode: "paises"
     };
 }
@@ -361,23 +326,38 @@ async function selectDifficulty(d) {
     document.getElementById('question-text').innerText = "Cargando preguntas...";
 
     if (selectedMode === 'logos') {
-        quizSet = Array.from({length: 10}, () => generateLogoQuestion());
+        const db = await loadJSON('logos'); // <--- CARGA JSON
+        quizSet = Array.from({length: 10}, () => generateLogoQuestion(db));
+
     } else if (selectedMode === 'paises') {
-        let pool = [];
-        if(selectedSubMode === 'mundial') pool = Object.values(COUNTRY_DB).flat();
-        else pool = COUNTRY_DB[selectedSubMode] || Object.values(COUNTRY_DB).flat();
+        const db = await loadJSON('paises'); // <--- CARGA JSON
+        let pool = (selectedSubMode === 'mundial') 
+            ? Object.values(db).flat() 
+            : db[selectedSubMode] || Object.values(db).flat();
         
         const shuffled = pool.sort(() => Math.random() - 0.5);
-        quizSet = Array.from({length: Math.min(10, shuffled.length)}, (_, i) => generateFlagQuestion(shuffled, i));
-    } else {
-        const apiQuestions = await fetchAPIData(selectedMode === 'mixto' ? 7 : 10, selectedDiff);
-        quizSet = apiQuestions || [];
-        if (selectedMode === 'mixto') {
-            selectedSubMode = 'todos';
-            const worldPool = Object.values(COUNTRY_DB).flat().sort(() => Math.random() - 0.5);
-            quizSet.push(generateFlagQuestion(worldPool, 0), generateFlagQuestion(worldPool, 1), generateLogoQuestion());
-        }
+        quizSet = Array.from({length: Math.min(10, shuffled.length)}, (_, i) => generateFlagQuestion(shuffled, i, db));
+
+    } else if (selectedMode === 'trivia') {
+        // Si tienes un trivia.json local
+        const db = await loadJSON('trivia');
+        // Aquí filtrarías por selectedSubMode (historia, ciencia...)
+        let pool = db[selectedSubMode] || Object.values(db).flat();
+        quizSet = pool.sort(() => Math.random() - 0.5).slice(0, 10);
+
+    } else if (selectedMode === 'mixto') {
+        // Carga ambos para el modo mixto
+        const dbL = await loadJSON('logos');
+        const dbP = await loadJSON('paises');
+        const worldPool = Object.values(dbP).flat().sort(() => Math.random() - 0.5);
+        quizSet = [
+            generateLogoQuestion(dbL), 
+            generateLogoQuestion(dbL),
+            generateFlagQuestion(worldPool, 0, dbP),
+            generateFlagQuestion(worldPool, 1, dbP)
+        ];
     }
+
     quizSet.sort(() => Math.random() - 0.5);
     points = 0; currentIndex = 0; lives = 3; streak = 0;
     renderQuestion();

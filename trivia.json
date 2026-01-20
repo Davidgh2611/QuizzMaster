@@ -1,0 +1,52 @@
+{
+  "historia": [
+    { "q": "¿En qué año comenzó la Revolución Francesa?", "options": ["1789", "1776", "1812", "1492"], "correct": 0 },
+    { "q": "¿Quién fue el primer emperador romano?", "options": ["Julio César", "Augusto", "Nerón", "Calígula"], "correct": 1 },
+    { "q": "¿En qué año se descubrió América?", "options": ["1492", "1500", "1488", "1453"], "correct": 0 },
+    { "q": "¿Quién fue la última reina de Egipto?", "options": ["Nefertiti", "Cleopatra VII", "Hatshepsut", "Isis"], "correct": 1 },
+    { "q": "¿En qué ciudad se fundó la ONU?", "options": ["Nueva York", "San Francisco", "Ginebra", "París"], "correct": 1 },
+    { "q": "¿Qué muro dividió una ciudad alemana hasta 1989?", "options": ["Muro de Frankfurt", "Muro de Berlín", "Muro de Hamburgo", "Muro de Munich"], "correct": 1 },
+    { "q": "¿Quién escribió la Declaración de Independencia de EE. UU.?", "options": ["Benjamin Franklin", "Thomas Jefferson", "George Washington", "Alexander Hamilton"], "correct": 1 },
+    { "q": "¿Qué país fue el hogar de la civilización Inca?", "options": ["México", "Perú", "Colombia", "Chile"], "correct": 1 },
+    { "q": "¿Cómo se llamaba el barco de Charles Darwin?", "options": ["Victory", "Beagle", "Endeavour", "Santa María"], "correct": 1 },
+    { "q": "¿Qué filósofo griego fue maestro de Alejandro Magno?", "options": ["Platón", "Aristóteles", "Sócrates", "Heródoto"], "correct": 1 }
+  ],
+  "ciencia": [
+    { "q": "¿Cuál es el elemento más abundante en el universo?", "options": ["Oxígeno", "Hidrógeno", "Helio", "Carbono"], "correct": 1 },
+    { "q": "¿Cuántos huesos tiene el cuerpo humano adulto?", "options": ["206", "215", "195", "210"], "correct": 0 },
+    { "q": "¿Cuál es la velocidad de la luz (aprox)?", "options": ["300,000 km/s", "150,000 km/s", "1,000,000 km/s", "50,000 km/s"], "correct": 0 },
+    { "q": "¿Qué planeta es conocido como el 'Planeta Rojo'?", "options": ["Marte", "Venus", "Júpiter", "Saturno"], "correct": 0 },
+    { "q": "¿Cuál es el órgano más grande del cuerpo humano?", "options": ["Hígado", "Piel", "Pulmones", "Cerebro"], "correct": 1 },
+    { "q": "¿Quién propuso la Teoría de la Relatividad?", "options": ["Isaac Newton", "Albert Einstein", "Nikola Tesla", "Stephen Hawking"], "correct": 1 },
+    { "q": "¿Cómo se llama el proceso por el cual las plantas fabrican su alimento?", "options": ["Respiración", "Fotosíntesis", "Fermentación", "Combustión"], "correct": 1 },
+    { "q": "¿Cuál es el metal que es líquido a temperatura ambiente?", "options": ["Plomo", "Mercurio", "Cobre", "Zinc"], "correct": 1 },
+    { "q": "¿Qué partícula del átomo tiene carga negativa?", "options": ["Protón", "Neutrón", "Electrón", "Fotón"], "correct": 2 },
+    { "q": "¿Qué escala mide la magnitud de los terremotos?", "options": ["Celsius", "Richter", "Kelvin", "Fahrenheit"], "correct": 1 }
+  ],
+  "entretenimiento": [
+    { "q": "¿Quién interpretó a Iron Man en el UCM?", "options": ["Chris Evans", "Robert Downey Jr.", "Chris Hemsworth", "Mark Ruffalo"], "correct": 1 },
+    { "q": "¿Cuál es la película más taquillera de la historia (sin ajustar)?", "options": ["Titanic", "Avengers: Endgame", "Avatar", "Star Wars"], "correct": 2 },
+    { "q": "¿En qué banda cantaba Freddie Mercury?", "options": ["The Beatles", "Queen", "Led Zeppelin", "AC/DC"], "correct": 1 },
+    { "q": "¿Cómo se llama el reino de la película 'Frozen'?", "options": ["Arendelle", "Genovia", "Far Far Away", "Atlantis"], "correct": 0 },
+    { "q": "¿Quién es el creador de Star Wars?", "options": ["Steven Spielberg", "George Lucas", "James Cameron", "Ridley Scott"], "correct": 1 },
+    { "q": "¿En qué serie aparece el personaje 'Eleven'?", "options": ["Stranger Things", "Dark", "Elite", "Black Mirror"], "correct": 0 },
+    { "q": "¿Cuál es el videojuego más vendido de todos los tiempos?", "options": ["Minecraft", "Tetris", "GTA V", "Super Mario Bros"], "correct": 0 },
+    { "q": "¿Qué actor protagoniza la saga 'Misión Imposible'?", "options": ["Brad Pitt", "Tom Cruise", "Will Smith", "Keanu Reeves"], "correct": 1 },
+    { "q": "¿Cuál es el nombre real de Lady Gaga?", "options": ["Stefani Germanotta", "Robyn Fenty", "Katy Hudson", "Katheryn Perry"], "correct": 0 },
+    { "q": "¿Quién ganó el primer Oscar a Mejor Película?", "options": ["Wings", "Metropolis", "Sunrise", "The Jazz Singer"], "correct": 0 }
+  ],
+  "geografia": [
+    { "q": "¿Cuál es el río más largo del mundo?", "options": ["Nilo", "Amazonas", "Misisipi", "Yangtsé"], "correct": 1 },
+    { "q": "¿Cuál es el país más pequeño del mundo?", "options": ["Mónaco", "Nauru", "Vaticano", "San Marino"], "correct": 2 },
+    { "q": "¿En qué continente se encuentra el desierto del Sahara?", "options": ["Asia", "África", "Oceanía", "América"], "correct": 1 },
+    { "q": "¿Cuál es la capital de Australia?", "options": ["Sídney", "Melbourne", "Canberra", "Perth"], "correct": 2 },
+    { "q": "¿Qué océano es el más grande del mundo?", "options": ["Atlántico", "Índico", "Ártico", "Pacífico"], "correct": 3 }
+  ],
+  "deportes": [
+    { "q": "¿Quién tiene más Balones de Oro en la historia?", "options": ["Cristiano Ronaldo", "Pele", "Lionel Messi", "Maradona"], "correct": 2 },
+    { "q": "¿Cada cuántos años se celebran los Juegos Olímpicos?", "options": ["2", "4", "5", "6"], "correct": 1 },
+    { "q": "¿En qué deporte destaca Tiger Woods?", "options": ["Tenis", "Golf", "Baloncesto", "Fútbol Americano"], "correct": 1 },
+    { "q": "¿Qué país ha ganado más mundiales de fútbol?", "options": ["Alemania", "Italia", "Brasil", "Argentina"], "correct": 2 },
+    { "q": "¿Cuántos minutos dura un partido de rugby?", "options": ["90", "80", "60", "70"], "correct": 1 }
+  ]
+}

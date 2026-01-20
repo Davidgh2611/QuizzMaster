@@ -1,6 +1,6 @@
 
 <body>
-
+ 
 <div class="container">
     <h1>🧠 Ultimate Quiz Master Pro</h1>
     <p style="text-align: center; font-style: italic;">La plataforma definitiva de desafíos intelectuales: Logos, Trivia y Geografía.</p>
