@@ -1,6 +1,7 @@
 // --- ESTADO ---
 let selectedMode = '', selectedDiff = '', quizSet = [], currentIndex = 0;
 let points = 0, streak = 0, lives = 3;
+let selectedSubMode = ''; // Nueva variable para categorías y continentes
 
 // VARIABLES DEL CRONÓMETRO
 let timerInterval;
@@ -18,7 +19,7 @@ if (localStorage.getItem('darkMode') === 'true') {
     document.body.classList.add('dark-mode');
 }
 
-// --- FUNCIÓN MODO OSCURO (CORREGIDA) ---
+// --- FUNCIÓN MODO OSCURO ---
 function toggleDarkMode() {
     const isDark = document.body.classList.toggle('dark-mode');
     localStorage.setItem('darkMode', isDark);
@@ -38,25 +39,70 @@ async function translateText(text) {
     }
 }
 
-// --- GENERADORES DE PREGUNTAS CON IMAGEN ---
-function generateLogoQuestion() {
-    const brands = [
+// --- BASES DE DATOS AMPLIADAS ---
+const LOGO_DB = {
+    tecnologia: [
         { name: "Google", domain: "google.com" }, { name: "Apple", domain: "apple.com" },
-        { name: "Amazon", domain: "amazon.com" }, { name: "Microsoft", domain: "microsoft.com" },
-        { name: "Tesla", domain: "tesla.com" }, { name: "Netflix", domain: "netflix.com" },
-        { name: "Nike", domain: "nike.com" }, { name: "Coca-Cola", domain: "cocacola.com" },
-        { name: "Starbucks", domain: "starbucks.com" }, { name: "McDonald's", domain: "mcdonalds.com" }
-    ];
-    const target = brands[Math.floor(Math.random() * brands.length)];
+        { name: "Microsoft", domain: "microsoft.com" }, { name: "Tesla", domain: "tesla.com" },
+        { name: "Intel", domain: "intel.com" }, { name: "Samsung", domain: "samsung.com" }
+    ],
+    vehiculos: [
+        { name: "BMW", domain: "bmw.com" }, { name: "Mercedes-Benz", domain: "mercedes-benz.com" },
+        { name: "Ferrari", domain: "ferrari.com" }, { name: "Toyota", domain: "toyota.com" },
+        { name: "Audi", domain: "audi.com" }, { name: "Porsche", domain: "porsche.com" }
+    ],
+    comida: [
+        { name: "McDonald's", domain: "mcdonalds.com" }, { name: "Starbucks", domain: "starbucks.com" },
+        { name: "Coca-Cola", domain: "cocacola.com" }, { name: "Burger King", domain: "burgerking.com" },
+        { name: "Pepsi", domain: "pepsi.com" }, { name: "Subway", domain: "subway.com" }
+    ],
+    ropa: [
+        { name: "Nike", domain: "nike.com" }, { name: "Adidas", domain: "adidas.com" },
+        { name: "Zara", domain: "zara.com" }, { name: "Gucci", domain: "gucci.com" },
+        { name: "Puma", domain: "puma.com" }, { name: "H&M", domain: "hm.com" }
+    ]
+};
+
+const COUNTRY_DB = {
+    europa: [
+        { n: "España", c: "es" }, { n: "Francia", c: "fr" }, { n: "Italia", c: "it" },
+        { n: "Alemania", c: "de" }, { n: "Reino Unido", c: "gb" }, { n: "Portugal", c: "pt" }
+    ],
+    america: [
+        { n: "México", c: "mx" }, { n: "Argentina", c: "ar" }, { n: "Brasil", c: "br" },
+        { n: "Estados Unidos", c: "us" }, { n: "Canadá", c: "ca" }, { n: "Chile", c: "cl" }
+    ],
+    asia: [
+        { n: "Japón", c: "jp" }, { n: "China", c: "cn" }, { n: "Corea del Sur", c: "kr" },
+        { n: "India", c: "in" }, { n: "Tailandia", c: "th" }, { n: "Vietnam", c: "vn" }
+    ],
+    africa: [
+        { n: "Egipto", c: "eg" }, { n: "Sudáfrica", c: "za" }, { n: "Marruecos", c: "ma" },
+        { n: "Nigeria", c: "ng" }, { n: "Kenia", c: "ke" }, { n: "Ghana", c: "gh" }
+    ]
+};
+
+// --- GENERADORES DE PREGUNTAS ---
+function generateLogoQuestion() {
+    let pool = [];
+    if (LOGO_DB[selectedSubMode]) pool = LOGO_DB[selectedSubMode];
+    else pool = Object.values(LOGO_DB).flat(); // Si es "todos"
+
+    const target = pool[Math.floor(Math.random() * pool.length)];
     let options = [target.name];
+    let allNames = Object.values(LOGO_DB).flat().map(b => b.name);
+    
     while(options.length < 4) {
-        let rand = brands[Math.floor(Math.random() * brands.length)].name;
+        let rand = allNames[Math.floor(Math.random() * allNames.length)];
         if(!options.includes(rand)) options.push(rand);
     }
     options.sort(() => Math.random() - 0.5);
+
+    const pubKey = "pk_H_lv-2wxSXabPJG-tvL3lg";
+
     return {
         q: "¿A qué empresa pertenece este logo?",
-        img: `https://logo.clearbit.com/${target.domain}`,
+        img: `https://img.logo.dev/${target.domain}?token=${pubKey}`,
         options: options,
         correct: options.indexOf(target.name),
         difficulty: "medio",
@@ -64,24 +110,13 @@ function generateLogoQuestion() {
     };
 }
 
-// Función auxiliar para obtener países sin repetición para una sesión
-function getShuffledCountries() {
-    const countries = [
-        { n: "España", c: "es" }, { n: "México", c: "mx" }, { n: "Argentina", c: "ar" },
-        { n: "Francia", c: "fr" }, { n: "Japón", c: "jp" }, { n: "Brasil", c: "br" },
-        { n: "Italia", c: "it" }, { n: "Estados Unidos", c: "us" },
-        { n: "Alemania", c: "de" }, { n: "Reino Unido", c: "gb" },
-        { n: "Canadá", c: "ca" }, { n: "Australia", c: "au" }, { n: "China", c: "cn" },
-        { n: "Egipto", c: "eg" }, { n: "Rusia", c: "ru" }, { n: "India", c: "in" }
-    ];
-    return countries.sort(() => Math.random() - 0.5);
-}
-
 function generateFlagQuestion(shuffledList, index) {
     const target = shuffledList[index];
     let options = [target.n];
+    let allCountries = Object.values(COUNTRY_DB).flat().map(c => c.n);
+    
     while(options.length < 4) {
-        let rand = shuffledList[Math.floor(Math.random() * shuffledList.length)].n;
+        let rand = allCountries[Math.floor(Math.random() * allCountries.length)];
         if(!options.includes(rand)) options.push(rand);
     }
     options.sort(() => Math.random() - 0.5);
@@ -158,7 +193,7 @@ function checkWheelCooldown() {
     }
 }
 
-// --- LÓGICA DEL CRONÓMETRO ---
+// --- CRONÓMETRO ---
 function startTimer() {
     clearInterval(timerInterval);
     timeLeft = 15;
@@ -193,7 +228,7 @@ function handleTimeout() {
     }, 1200);
 }
 
-// --- NOTIFICACIONES Y LOGROS ---
+// --- LOGROS Y UI ---
 function showAchievementToast(title, icon) {
     const toast = document.createElement('div');
     toast.className = 'achievement-notification';
@@ -211,7 +246,6 @@ function checkAchievements() {
     if (unlockedNew) saveData();
 }
 
-// --- UTILIDADES ---
 function decodeHTML(html) { const txt = document.createElement("textarea"); txt.innerHTML = html; return txt.value; }
 
 function updateUI() {
@@ -234,14 +268,11 @@ function updateUI() {
         shieldInd.style.display = inventory.shield > 0 ? 'block' : 'none';
         shieldInd.innerText = `🛡️ x${inventory.shield}`;
     }
-
-    // Gestionar visibilidad del botón de inicio en la cabecera
     const homeBtn = document.getElementById('home-btn');
     if (homeBtn) {
         const isMainMenu = document.getElementById('screen-modes').classList.contains('active');
         homeBtn.style.display = isMainMenu ? 'none' : 'flex';
     }
-
     checkAchievements();
     checkWheelCooldown();
 }
@@ -266,13 +297,62 @@ async function fetchAPIData(amount = 10, difficulty = 'medium') {
     } catch (e) { return null; }
 }
 
-// --- LÓGICA DE MODOS ---
+// --- LÓGICA DE MODOS Y CATEGORÍAS ---
 function selectMode(m) { 
     selectedMode = m; 
     const titles = { 'logos': '🖼️ Solo Logos', 'trivia': '📚 Solo Trivia', 'mixto': '🔥 Modo Mixto', 'paises': '🌍 Solo Países' };
     const titleEl = document.getElementById('mode-title');
     if(titleEl) titleEl.innerText = titles[m] || 'Dificultad';
-    showScreen('screen-diffs'); 
+
+    // Crear dinámicamente el menú de subcategorías si aplica
+    if(m === 'logos' || m === 'paises') {
+        renderSubModeMenu(m);
+        showScreen('screen-submodes'); // Debes tener este ID en tu HTML
+    } else {
+        showScreen('screen-diffs');
+    }
+}
+
+function renderSubModeMenu(mode) {
+    const container = document.getElementById('submode-options-container');
+    const title = document.getElementById('submode-title');
+    if(!container) return;
+    
+    container.innerHTML = '';
+    container.className = 'submode-grid'; 
+    title.innerText = mode === 'logos' ? 'Categorías de Logos' : 'Selecciona Continente';
+    
+    let options = [];
+    const icons = {
+        'tecnologia': '💻', 'vehiculos': '🚗', 'comida': '🍔', 'ropa': '👕', 'todos': '✨',
+        'europa': '🇪🇺', 'america': '🌎', 'asia': '⛩️', 'africa': '🦁', 'mundial': '🌐'
+    };
+
+    const classMap = {
+        'tecnologia': 'cat-tech', 'vehiculos': 'cat-cars', 'comida': 'cat-food', 'ropa': 'cat-fashion', 'todos': 'cat-all',
+        'europa': 'cat-euro', 'america': 'cat-amer', 'asia': 'cat-asia', 'africa': 'cat-afri', 'mundial': 'cat-all'
+    };
+
+    if(mode === 'logos') options = ['tecnologia', 'vehiculos', 'comida', 'ropa', 'todos'];
+    if(mode === 'paises') options = ['europa', 'america', 'asia', 'africa', 'mundial'];
+
+    options.forEach(opt => {
+        const btn = document.createElement('button');
+        const colorClass = classMap[opt] || 'cat-all';
+        btn.className = `btn-category ${colorClass}`;
+        
+        const icon = icons[opt] || '❓';
+        btn.innerHTML = `
+            <span style="font-size: 2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">${icon}</span>
+            <span>${opt.toUpperCase()}</span>
+        `;
+        
+        btn.onclick = () => {
+            selectedSubMode = opt;
+            showScreen('screen-diffs');
+        };
+        container.appendChild(btn);
+    });
 }
 
 async function selectDifficulty(d) {
@@ -283,14 +363,19 @@ async function selectDifficulty(d) {
     if (selectedMode === 'logos') {
         quizSet = Array.from({length: 10}, () => generateLogoQuestion());
     } else if (selectedMode === 'paises') {
-        const shuffled = getShuffledCountries();
+        let pool = [];
+        if(selectedSubMode === 'mundial') pool = Object.values(COUNTRY_DB).flat();
+        else pool = COUNTRY_DB[selectedSubMode] || Object.values(COUNTRY_DB).flat();
+        
+        const shuffled = pool.sort(() => Math.random() - 0.5);
         quizSet = Array.from({length: Math.min(10, shuffled.length)}, (_, i) => generateFlagQuestion(shuffled, i));
     } else {
         const apiQuestions = await fetchAPIData(selectedMode === 'mixto' ? 7 : 10, selectedDiff);
         quizSet = apiQuestions || [];
         if (selectedMode === 'mixto') {
-            const shuffled = getShuffledCountries();
-            quizSet.push(generateFlagQuestion(shuffled, 0), generateFlagQuestion(shuffled, 1), generateLogoQuestion());
+            selectedSubMode = 'todos';
+            const worldPool = Object.values(COUNTRY_DB).flat().sort(() => Math.random() - 0.5);
+            quizSet.push(generateFlagQuestion(worldPool, 0), generateFlagQuestion(worldPool, 1), generateLogoQuestion());
         }
     }
     quizSet.sort(() => Math.random() - 0.5);
@@ -303,7 +388,6 @@ function renderQuestion() {
     updateUI();
     startTimer();
     
-    // Actualizar barra de progreso (Basado en el progreso del nivel actual)
     const progressFill = document.getElementById('level-progress-fill');
     if(progressFill) {
         const percentage = (currentIndex / quizSet.length) * 100;
@@ -313,32 +397,30 @@ function renderQuestion() {
     document.getElementById('question-text').innerText = q.q;
     
     const logoArea = document.getElementById('logo-area');
-    logoArea.innerHTML = q.img ? `<img src="${q.img}" alt="Pregunta" style="max-width: 150px; max-height: 120px; border-radius: 8px; display: block; margin: 0 auto; background: white; padding: 10px;">` : '';
-    logoArea.style.display = q.img ? 'block' : 'none';
+    logoArea.innerHTML = ''; 
+    logoArea.style.background = 'transparent';
+
+    if (q.img) {
+        logoArea.style.display = 'flex';
+        logoArea.style.height = '220px'; 
+        const img = document.createElement('img');
+        img.src = q.img;
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.objectFit = "contain"; 
+        img.style.background = "white"; 
+        img.style.borderRadius = "12px";
+        img.onerror = () => {
+            const initial = q.options[q.correct].charAt(0);
+            logoArea.innerHTML = `<div class="fallback-logo">${initial}</div>`;
+        };
+        logoArea.appendChild(img);
+    } else {
+        logoArea.style.display = 'none';
+    }
 
     const optArea = document.getElementById('options-area');
     optArea.innerHTML = '';
-
-    if (inventory.half > 0) {
-        const hBtn = document.createElement('button');
-        hBtn.className = 'opt-btn'; 
-        hBtn.style.gridColumn = "span 2";
-        hBtn.innerHTML = `🌓 Filtro 50/50 (${inventory.half})`;
-        hBtn.onclick = () => {
-            inventory.half--;
-            const correctIdx = q.correct;
-            const allOptionBtns = optArea.querySelectorAll('.opt-btn-choice');
-            let indices = [0, 1, 2, 3].filter(idx => idx !== correctIdx).sort(() => Math.random() - 0.5);
-            indices.slice(0, 2).forEach(idx => {
-                allOptionBtns[idx].style.opacity = '0.2';
-                allOptionBtns[idx].disabled = true;
-            });
-            hBtn.remove();
-            saveData();
-            updateUI();
-        };
-        optArea.appendChild(hBtn);
-    }
 
     q.options.forEach((opt, i) => {
         const btn = document.createElement('button');
@@ -395,11 +477,6 @@ function saveData() {
 
 function finish() {
     clearInterval(timerInterval);
-    
-    // Al finalizar, la barra se completa al 100%
-    const progressFill = document.getElementById('level-progress-fill');
-    if(progressFill) progressFill.style.width = '100%';
-
     totalPoints += points;
     if (points > highScore) { highScore = points; }
     saveData();

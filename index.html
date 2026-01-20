@@ -92,6 +92,16 @@
             background: rgba(255, 255, 255, 0.05);
             border-color: rgba(255, 255, 255, 0.1);
         }
+
+        /* ESTILO PARA EL CONTENEDOR DE SUBCATEGORÍAS */
+        #submode-options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -135,6 +145,14 @@
             <button class="btn-choice" onclick="selectMode('mixto')">🔥 Modo Mixto</button>
             <button class="btn-choice shop-btn" onclick="showScreen('screen-shop')">🛒 Tienda</button>
         </div>
+    </div>
+
+    <div id="screen-submodes" class="screen">
+        <h1 id="submode-title">Selecciona</h1>
+        <div id="submode-options-container"></div>
+        <button class="nav-button" style="margin-top: 20px; padding: 12px 30px; border-radius: 20px;" onclick="showScreen('screen-modes')">
+            ↩ Volver al Menú
+        </button>
     </div>
 
     <div id="wheel-modal" class="modal-overlay">

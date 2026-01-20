@@ -581,3 +581,65 @@ body.dark-mode .item-price-tag { background: var(--primary); }
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* Centrado de la pantalla de categorías */
+#screen-submodes {
+    display: none; /* Se activa con JS */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 80vh;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Cuadrícula de categorías centrada */
+.submode-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Dos columnas iguales */
+    gap: 15px;
+    width: 100%;
+    max-width: 350px; /* Ancho máximo para que no se estiren de más */
+    margin: 20px auto; /* Centrado horizontal */
+}
+
+.btn-category {
+    border: none;
+    border-radius: 18px;
+    padding: 25px 10px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    font-size: 0.9rem;
+    text-transform: capitalize;
+}
+
+/* El botón de "Todos/Mundial" ocupa las dos columnas si quieres destacarlo */
+.btn-category.cat-all {
+    grid-column: span 2;
+    padding: 15px;
+}
+
+.btn-category:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+}
+
+/* Colores Dinámicos */
+.cat-tech { background: linear-gradient(135deg, #00c6ff, #0072ff); }
+.cat-cars { background: linear-gradient(135deg, #ff416c, #ff4b2b); }
+.cat-food { background: linear-gradient(135deg, #f7971e, #ffd200); }
+.cat-fashion { background: linear-gradient(135deg, #a8c0ff, #3f2b96); }
+.cat-euro { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.cat-amer { background: linear-gradient(135deg, #4568dc, #b06ab3); }
+.cat-asia { background: linear-gradient(135deg, #f85032, #e73827); }
+.cat-afri { background: linear-gradient(135deg, #4b6cb7, #182848); }
+.cat-all { background: linear-gradient(135deg, #616161, #212121); }
