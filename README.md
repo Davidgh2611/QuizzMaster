@@ -1,24 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>README - Ultimate Quiz Master Pro</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 20px; background-color: #f4f7f6; }
-        .container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; text-align: center; }
-        h2 { color: #2980b9; margin-top: 30px; border-left: 5px solid #3498db; padding-left: 15px; }
-        .badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; color: white; margin-right: 5px; }
-        .badge-js { background: #f1c40f; color: #000; }
-        .badge-html { background: #e67e22; }
-        .badge-css { background: #3498db; }
-        .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
-        .feature-item { background: #ecf0f1; padding: 15px; border-radius: 8px; border-left: 4px solid #2ecc71; }
-        code { background: #f8f8f8; padding: 2px 5px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #e74c3c; }
-        .tech-stack { display: flex; justify-content: space-around; padding: 20px 0; text-align: center; }
-        .footer { text-align: center; margin-top: 50px; font-size: 0.9em; color: #7f8c8d; }
-    </style>
-</head>
+
 <body>
 
 <div class="container">
