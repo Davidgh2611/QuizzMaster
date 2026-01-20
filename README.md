@@ -1,91 +1,90 @@
 <!DOCTYPE html>
 <html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>README - Ultimate Quiz Master Pro</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 20px; background-color: #f4f7f6; }
+        .container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; text-align: center; }
+        h2 { color: #2980b9; margin-top: 30px; border-left: 5px solid #3498db; padding-left: 15px; }
+        .badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; color: white; margin-right: 5px; }
+        .badge-js { background: #f1c40f; color: #000; }
+        .badge-html { background: #e67e22; }
+        .badge-css { background: #3498db; }
+        .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        .feature-item { background: #ecf0f1; padding: 15px; border-radius: 8px; border-left: 4px solid #2ecc71; }
+        code { background: #f8f8f8; padding: 2px 5px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #e74c3c; }
+        .tech-stack { display: flex; justify-content: space-around; padding: 20px 0; text-align: center; }
+        .footer { text-align: center; margin-top: 50px; font-size: 0.9em; color: #7f8c8d; }
+    </style>
+</head>
 <body>
 
-<div align="center">
-  <img src="https://img.icons8.com/fluency/96/brain.png" alt="Logo" width="80">
-  <h1>🧠 Ultimate Quiz Master Pro</h1>
-  <p><strong>Un juego de trivia y reconocimiento de logos con diseño premium, sistema de economía y potenciadores.</strong></p>
+<div class="container">
+    <h1>🧠 Ultimate Quiz Master Pro</h1>
+    <p style="text-align: center; font-style: italic;">La plataforma definitiva de desafíos intelectuales: Logos, Trivia y Geografía.</p>
 
-  <p>
-    <img src="https://img.shields.io/github/stars/Davidgh2611/QuizzMaster?style=for-the-badge&color=ffd700" alt="Stars">
-    <img src="https://img.shields.io/github/forks/Davidgh2611/QuizzMaster?style=for-the-badge&color=4a90e2" alt="Forks">
-    <img src="https://img.shields.io/github/license/Davidgh2611/QuizzMaster?style=for-the-badge" alt="License">
-  </p>
-</div>
+    <div style="text-align: center; margin: 20px 0;">
+        <span class="badge badge-html">HTML5</span>
+        <span class="badge badge-css">CSS3 Flexbox/Grid</span>
+        <span class="badge badge-js">JavaScript ES6+</span>
+    </div>
 
-<hr>
+    <h2>🚀 Descripción del Proyecto</h2>
+    <p>
+        <strong>Ultimate Quiz Master Pro</strong> es una aplicación web interactiva de juegos de preguntas y respuestas diseñada para ofrecer una experiencia de usuario gamificada y fluida. 
+        El proyecto destaca por su sistema dinámico de categorías, permitiendo a los usuarios especializarse en áreas como tecnología, vehículos, gastronomía y geografía mundial.
+    </p>
 
-<h3>🚀 Características Principales</h3>
-<ul>
-    <li><strong>🎨 Diseño Premium:</strong> Interfaz moderna con modo oscuro dinámico, degradados dorados y efectos de tarjetas interactivas.</li>
-    <li><strong>🎮 Modos de Juego:</strong> Elige entre "Solo Logos", "Solo Trivia" o el desafiante "Modo Mixto".</li>
-    <li><strong>🛒 Tienda de Poderes:</strong> Usa tus monedas ganadas para comprar <strong>Escudos Protectores</strong> o el <strong>Filtro 50/50</strong>.</li>
-    <li><strong>🔥 Sistema de Combo:</strong> Multiplicadores de puntos por rachas de respuestas correctas.</li>
-    <li><strong>📱 Totalmente Responsivo:</strong> Optimizado para una experiencia perfecta en móviles y escritorio.</li>
-</ul>
+    <h2>✨ Características Principales</h2>
+    <div class="feature-grid">
+        <div class="feature-item">
+            <strong>🎮 Modos de Juego Diversos</strong>
+            <p>Incluye Trivia (OpenDB API), Identificación de Logos y Banderas del mundo.</p>
+        </div>
+        <div class="feature-item">
+            <strong>📂 Subcategorías Inteligentes</strong>
+            <p>Filtros por sectores (Comida, Ropa, Tech) y continentes (Europa, América, Asia, África).</p>
+        </div>
+        <div class="feature-item">
+            <strong>💰 Sistema de Economía</strong>
+            <p>Gana monedas, gira la ruleta diaria y compra Power-Ups (Escudos, 50/50) en la tienda.</p>
+        </div>
+        <div class="feature-item">
+            <strong>🌓 Interfaz Adaptativa</strong>
+            <p>Modo oscuro nativo, diseño responsive y sistema de "Combos" por rachas de aciertos.</p>
+        </div>
+    </div>
 
-<hr>
+    <h2>🛠️ Arquitectura Técnica</h2>
+    <ul>
+        <li><strong>Frontend:</strong> Arquitectura basada en estados (SPA - Single Page Application) mediante manipulación directa del DOM.</li>
+        <li><strong>API Integration:</strong> Conexión con <code>Open Trivia Database</code> para preguntas y <code>Logo.dev</code> para recursos visuales.</li>
+        <li><strong>Persistencia:</strong> Uso de <code>localStorage</code> para guardar récords, monedas, inventario y logros del usuario de forma local.</li>
+        <li><strong>Diseño:</strong> Grid Layout para menús de categorías y animaciones CSS3 para transiciones de pantalla.</li>
+    </ul>
 
-<h3>🛠️ Tecnologías Utilizadas</h3>
-<table align="center">
-  <tr>
-    <td align="center" width="120">
-      <img src="https://img.icons8.com/color/48/html-5--v1.png" alt="HTML5"><br>HTML5
-    </td>
-    <td align="center" width="120">
-      <img src="https://img.icons8.com/color/48/css3.png" alt="CSS3"><br>CSS3
-    </td>
-    <td align="center" width="120">
-      <img src="https://img.icons8.com/color/48/javascript--v1.png" alt="JavaScript"><br>JavaScript
-    </td>
-  </tr>
-</table>
+    <h2>📦 Estructura de Archivos</h2>
+    <ul>
+        <li><code>index.html</code> - Estructura semántica y contenedores de pantallas.</li>
+        <li><code>style.css</code> - Diseño moderno, variables de color y animaciones.</li>
+        <li><code>script.js</code> - Motor lógico, gestión de cronómetro, ruleta y validación de respuestas.</li>
+    </ul>
 
-<hr>
+    <h2>⚙️ Instalación y Uso</h2>
+    <ol>
+        <li>Clona el repositorio o descarga los archivos.</li>
+        <li>Asegúrate de mantener la estructura de carpetas.</li>
+        <li>Abre <code>index.html</code> en cualquier navegador moderno (Chrome, Brave, Firefox, Edge).</li>
+        <li>¡Empieza a jugar y rompe tu propio récord!</li>
+    </ol>
 
-<h3>📦 Instalación y Uso</h3>
-<ol>
-    <li>
-        <strong>Clona el repositorio:</strong>
-        <pre><code>git clone https://github.com/Davidgh2611/QuizzMaster.git</code></pre>
-    </li>
-    <li>
-        <strong>Navega a la carpeta:</strong>
-        <pre><code>cd QuizzMaster</code></pre>
-    </li>
-    <li>
-        <strong>Abre el archivo principal:</strong>
-        <p>Simplemente abre <code>index.html</code> en tu navegador favorito.</p>
-    </li>
-</ol>
-
-<hr>
-
-<h3>🕹️ Cómo Jugar</h3>
-<ul>
-    <li><strong>Selecciona un Modo:</strong> Decide si quieres preguntas de texto o imágenes.</li>
-    <li><strong>Elige tu Dificultad:</strong> Fácil, Medio o Difícil (cada uno con diferentes recompensas).</li>
-    <li><strong>Gana Monedas:</strong> Acierta preguntas para acumular dinero en el juego.</li>
-    <li><strong>Usa la Tienda:</strong> Antes de empezar, o al perder, visita la tienda para comprar ayudas que te mantendrán en la partida.</li>
-</ul>
-
-<hr>
-
-<h3>🤝 Contribuciones</h3>
-<p>¡Las contribuciones son bienvenidas! Si tienes ideas para nuevas preguntas, modos de juego o mejoras estéticas:</p>
-<ol>
-    <li>Haz un <strong>Fork</strong> del proyecto.</li>
-    <li>Crea una rama para tu mejora (<code>git checkout -b feature/MejoraIncreible</code>).</li>
-    <li>Haz un <strong>Commit</strong> de tus cambios (<code>git commit -m 'Add some feature'</code>).</li>
-    <li>Haz un <strong>Push</strong> a la rama (<code>git push origin feature/MejoraIncreible</code>).</li>
-    <li>Abre un <strong>Pull Request</strong>.</li>
-</ol>
-
-<br>
-
-<div align="center"> 
-    <p>Desarrollado con ❤️ por <a href="https://github.com/Davidgh2611">Davidgh2611</a></p> 
+    <div class="footer">
+        <hr>
+        <p>Desarrollado con ❤️ para amantes de los Quiz y la Programación.</p>
+        <p>&copy; 2026 Ultimate Quiz Master Project - Versión 2.0.0</p>
+    </div>
 </div>
 
 </body>
