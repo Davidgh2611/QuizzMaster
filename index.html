@@ -37,7 +37,7 @@
             grid-template-columns: 1fr auto 1fr; /* Tres columnas: laterales flexibles, centro fijo */
             align-items: center;
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         #lives-container {
@@ -68,6 +68,29 @@
             line-height: 1;
             font-weight: bold;
             color: #f1c40f;
+        }
+
+        /* BARRA DE PROGRESO */
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            transition: width 0.4s ease;
+        }
+
+        .dark-mode .progress-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
@@ -152,6 +175,10 @@
                 <div id="combo-badge">x1.0</div>
                 <span id="shield-indicator" style="display:none">🛡️</span>
             </div>
+        </div>
+
+        <div class="progress-container">
+            <div id="level-progress-fill" class="progress-fill"></div>
         </div>
 
         <div id="logo-area" class="img-container"></div>

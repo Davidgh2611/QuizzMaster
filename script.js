@@ -64,18 +64,24 @@ function generateLogoQuestion() {
     };
 }
 
-function generateFlagQuestion() {
+// Función auxiliar para obtener países sin repetición para una sesión
+function getShuffledCountries() {
     const countries = [
         { n: "España", c: "es" }, { n: "México", c: "mx" }, { n: "Argentina", c: "ar" },
         { n: "Francia", c: "fr" }, { n: "Japón", c: "jp" }, { n: "Brasil", c: "br" },
         { n: "Italia", c: "it" }, { n: "Estados Unidos", c: "us" },
         { n: "Alemania", c: "de" }, { n: "Reino Unido", c: "gb" },
-        { n: "Canadá", c: "ca" }, { n: "Australia", c: "au" }, { n: "China", c: "cn" }
+        { n: "Canadá", c: "ca" }, { n: "Australia", c: "au" }, { n: "China", c: "cn" },
+        { n: "Egipto", c: "eg" }, { n: "Rusia", c: "ru" }, { n: "India", c: "in" }
     ];
-    const target = countries[Math.floor(Math.random() * countries.length)];
+    return countries.sort(() => Math.random() - 0.5);
+}
+
+function generateFlagQuestion(shuffledList, index) {
+    const target = shuffledList[index];
     let options = [target.n];
     while(options.length < 4) {
-        let rand = countries[Math.floor(Math.random() * countries.length)].n;
+        let rand = shuffledList[Math.floor(Math.random() * shuffledList.length)].n;
         if(!options.includes(rand)) options.push(rand);
     }
     options.sort(() => Math.random() - 0.5);
@@ -277,12 +283,14 @@ async function selectDifficulty(d) {
     if (selectedMode === 'logos') {
         quizSet = Array.from({length: 10}, () => generateLogoQuestion());
     } else if (selectedMode === 'paises') {
-        quizSet = Array.from({length: 10}, () => generateFlagQuestion());
+        const shuffled = getShuffledCountries();
+        quizSet = Array.from({length: Math.min(10, shuffled.length)}, (_, i) => generateFlagQuestion(shuffled, i));
     } else {
         const apiQuestions = await fetchAPIData(selectedMode === 'mixto' ? 7 : 10, selectedDiff);
         quizSet = apiQuestions || [];
         if (selectedMode === 'mixto') {
-            quizSet.push(generateFlagQuestion(), generateFlagQuestion(), generateLogoQuestion());
+            const shuffled = getShuffledCountries();
+            quizSet.push(generateFlagQuestion(shuffled, 0), generateFlagQuestion(shuffled, 1), generateLogoQuestion());
         }
     }
     quizSet.sort(() => Math.random() - 0.5);
@@ -294,12 +302,17 @@ function renderQuestion() {
     const q = quizSet[currentIndex];
     updateUI();
     startTimer();
-    const progress = document.getElementById('progress-bar');
-    if(progress) progress.style.width = `${(currentIndex / quizSet.length) * 100}%`;
+    
+    // Actualizar barra de progreso (Basado en el progreso del nivel actual)
+    const progressFill = document.getElementById('level-progress-fill');
+    if(progressFill) {
+        const percentage = (currentIndex / quizSet.length) * 100;
+        progressFill.style.width = `${percentage}%`;
+    }
+
     document.getElementById('question-text').innerText = q.q;
     
     const logoArea = document.getElementById('logo-area');
-    // Fondo blanco para que los logos se vean bien en modo oscuro
     logoArea.innerHTML = q.img ? `<img src="${q.img}" alt="Pregunta" style="max-width: 150px; max-height: 120px; border-radius: 8px; display: block; margin: 0 auto; background: white; padding: 10px;">` : '';
     logoArea.style.display = q.img ? 'block' : 'none';
 
@@ -382,6 +395,11 @@ function saveData() {
 
 function finish() {
     clearInterval(timerInterval);
+    
+    // Al finalizar, la barra se completa al 100%
+    const progressFill = document.getElementById('level-progress-fill');
+    if(progressFill) progressFill.style.width = '100%';
+
     totalPoints += points;
     if (points > highScore) { highScore = points; }
     saveData();
