@@ -86,7 +86,6 @@ function selectMode(m) {
     const titleEl = document.getElementById('mode-title');
     if(titleEl) titleEl.innerText = titles[m] || 'Dificultad';
 
-    // Ahora Trivia también tiene categorías (Historia, Ciencia, etc.)
     if(m === 'logos' || m === 'paises' || m === 'trivia') {
         renderSubModeMenu(m);
         showScreen('screen-submodes');
@@ -101,12 +100,21 @@ function renderSubModeMenu(mode) {
     if(!container) return;
     
     container.innerHTML = '';
+    container.className = 'submode-grid'; // Aplicamos la parrilla 2-2-1
     
     let options = [];
     const icons = {
         'tecnologia': '💻', 'vehiculos': '🚗', 'comida': '🍔', 'ropa': '👕', 'todos': '✨',
         'europa': '🇪🇺', 'america': '🌎', 'asia': '⛩️', 'africa': '🦁', 'mundial': '🌐',
         'historia': '📜', 'ciencia': '🧪', 'entretenimiento': '🎬', 'deportes': '⚽'
+    };
+
+    // Mapeo de clases para degradados CSS
+    const colorClasses = {
+        'tecnologia': 'grad-tech', 'vehiculos': 'grad-cars', 'comida': 'grad-food', 'ropa': 'grad-fashion',
+        'europa': 'grad-euro', 'america': 'grad-amer', 'asia': 'grad-asia', 'africa': 'grad-afri',
+        'historia': 'grad-hist', 'ciencia': 'grad-cienc', 'entretenimiento': 'grad-ent', 'deportes': 'grad-dep',
+        'todos': 'grad-all', 'mundial': 'grad-all'
     };
 
     if(mode === 'logos') {
@@ -122,17 +130,22 @@ function renderSubModeMenu(mode) {
 
     options.forEach(opt => {
         const btn = document.createElement('button');
-        btn.className = `btn-category`;
+        const colorClass = colorClasses[opt] || 'grad-all';
+        btn.className = `btn-category ${colorClass}`;
+        
         const icon = icons[opt] || '❓';
-        btn.innerHTML = `<span style="font-size: 2rem;">${icon}</span><span>${opt.toUpperCase()}</span>`;
+        btn.innerHTML = `
+            <span class="category-icon">${icon}</span>
+            <span class="category-name">${opt.toUpperCase()}</span>
+        `;
+        
         btn.onclick = () => { selectedSubMode = opt; showScreen('screen-diffs'); };
         container.appendChild(btn);
     });
 }
 
 async function selectDifficulty(d) {
-    // 1. Normalizar y guardar la dificultad elegida
-    selectedDiff = d.toLowerCase().normalize("NFD").replace(/[\u0300//u036f]/g, "");
+    selectedDiff = d.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     showScreen('screen-game');
     document.getElementById('question-text').innerText = "Filtrando desafíos...";
 
@@ -140,7 +153,6 @@ async function selectDifficulty(d) {
     let tempPool = [];
     let selectedForMatch = [];
 
-    // 2. Carga de archivos según el modo
     if (selectedMode === 'logos') {
         rawData = await loadJSON('logos');
         tempPool = (selectedSubMode === 'todos') ? Object.values(rawData).flat() : (rawData[selectedSubMode] || []);
@@ -155,10 +167,7 @@ async function selectDifficulty(d) {
     }
     else if (selectedMode === 'mixto') {
         const [dbL, dbP, dbT] = await Promise.all([loadJSON('logos'), loadJSON('paises'), loadJSON('trivia')]);
-        
-        // En modo mixto, filtramos cada pool por la dificultad elegida antes de mezclar
         const filterDiff = (list) => list.filter(item => item.d === selectedDiff || !item.d);
-        
         const pL = filterDiff(Object.values(dbL).flat());
         const pP = filterDiff(Object.values(dbP).flat());
         const pT = filterDiff(Object.values(dbT).flat());
@@ -166,20 +175,12 @@ async function selectDifficulty(d) {
         for(let i=0; i<4; i++) selectedForMatch.push(generateLogoQuestionFromData(pL[Math.floor(Math.random()*pL.length)], pL));
         for(let i=0; i<3; i++) selectedForMatch.push(generateFlagQuestionFromData(pP[Math.floor(Math.random()*pP.length)], pP));
         for(let i=0; i<3; i++) selectedForMatch.push(pT[Math.floor(Math.random()*pT.length)]);
-        
         quizSet = shuffleArray(selectedForMatch);
     }
 
-    // 3. Aplicar Filtro de Dificultad para modos individuales
     if (selectedMode !== 'mixto') {
-        // Filtramos: que coincida la dificultad O que no tenga dificultad definida (como respaldo)
         let filteredPool = tempPool.filter(item => item.d === selectedDiff);
-
-        // RESPALDO: Si no hay suficientes preguntas de esa dificultad, usamos el pool general
-        if (filteredPool.length < 5) {
-            console.warn(`Pocas preguntas para nivel ${selectedDiff}, usando pool general.`);
-            filteredPool = tempPool; 
-        }
+        if (filteredPool.length < 5) filteredPool = tempPool; 
 
         availableQuestionsPool = shuffleArray([...filteredPool]);
         const picked = availableQuestionsPool.splice(0, 10);
@@ -194,6 +195,7 @@ async function selectDifficulty(d) {
     points = 0; currentIndex = 0; lives = 3; streak = 0;
     renderQuestion();
 }
+
 function renderQuestion() {
     const q = quizSet[currentIndex];
     updateUI();
@@ -214,7 +216,7 @@ function renderQuestion() {
         img.onerror = () => { logoArea.innerHTML = `<div class="fallback-logo">${q.options[q.correct].charAt(0)}</div>`; };
         logoArea.appendChild(img);
     } else {
-        logoArea.style.display = 'none'; // Ocultar si es trivia sin imagen
+        logoArea.style.display = 'none';
     }
 
     const optArea = document.getElementById('options-area');
@@ -255,20 +257,12 @@ function renderQuestion() {
     });
 }
 
-// --- SISTEMA DE TIEMPO ---
 function startTimer() {
     clearInterval(timerInterval);
-
-    // --- AJUSTE DE TIEMPO POR DIFICULTAD ---
-    if (selectedDiff === 'facil') {
-        timeLeft = 25; // Más tiempo para leer
-    } else if (selectedDiff === 'medio') {
-        timeLeft = 15; // Tiempo estándar
-    } else if (selectedDiff === 'dificil') {
-        timeLeft = 8;  // Reto máximo: menos de 10 segundos
-    } else {
-        timeLeft = 15; // Respaldo por si acaso
-    }
+    if (selectedDiff === 'facil') timeLeft = 25;
+    else if (selectedDiff === 'medio') timeLeft = 15;
+    else if (selectedDiff === 'dificil') timeLeft = 8;
+    else timeLeft = 15;
 
     const timerEl = document.getElementById('timer-display');
     if (timerEl) {
@@ -280,13 +274,9 @@ function startTimer() {
         timeLeft--;
         if (timerEl) {
             timerEl.innerText = `⏱️ ${timeLeft}s`;
-            // Cambiamos el aviso visual según la dificultad (umbral del 30%)
             if (timeLeft <= 4) timerEl.classList.add('timer-low');
         }
-        if (timeLeft <= 0) { 
-            clearInterval(timerInterval); 
-            handleTimeout(); 
-        }
+        if (timeLeft <= 0) { clearInterval(timerInterval); handleTimeout(); }
     }, 1000);
 }
 
@@ -295,10 +285,8 @@ function handleTimeout() {
     const q = quizSet[currentIndex];
     const correctBtn = document.querySelectorAll('.opt-btn-choice')[q.correct];
     if (correctBtn) correctBtn.classList.add('correct');
-    
     if (inventory.shield > 0) inventory.shield--;
     else { streak = 0; lives--; }
-    
     saveData();
     updateUI();
     setTimeout(() => {
@@ -306,6 +294,38 @@ function handleTimeout() {
         if (lives > 0 && currentIndex < quizSet.length) renderQuestion();
         else finish();
     }, 1200);
+}
+
+function updateUI() {
+    if(document.getElementById('high-score-display')) document.getElementById('high-score-display').innerText = `Récord: ${highScore}`;
+    if(document.getElementById('total-currency-display')) document.getElementById('total-currency-display').innerText = `💰 ${totalPoints}`;
+    if(document.getElementById('score')) document.getElementById('score').innerText = points;
+    if(document.getElementById('lives-container')) document.getElementById('lives-container').innerText = "❤️".repeat(Math.max(0, lives));
+    
+    const comboEl = document.getElementById('combo-badge');
+    if (comboEl) {
+        const val = (1 + (streak * 0.1)).toFixed(1);
+        const oldVal = comboEl.innerText;
+        comboEl.innerText = `x${val}`;
+        if (streak >= 3) {
+            comboEl.classList.add('combo-active');
+            if (`x${val}` !== oldVal) { // Animación de "Pop"
+                comboEl.animate([
+                    { transform: 'scale(1)' },
+                    { transform: 'scale(1.3)' },
+                    { transform: 'scale(1)' }
+                ], { duration: 200 });
+            }
+        } else {
+            comboEl.classList.remove('combo-active');
+        }
+    }
+
+    const shieldInd = document.getElementById('shield-indicator');
+    if (shieldInd) {
+        shieldInd.style.display = inventory.shield > 0 ? 'block' : 'none';
+        shieldInd.innerText = `🛡️ x${inventory.shield}`;
+    }
 }
 
 // --- FUNCIONES DE APOYO (RULETA, LOGROS, UI) ---

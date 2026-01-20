@@ -643,3 +643,94 @@ body.dark-mode .item-price-tag { background: var(--primary); }
 .cat-asia { background: linear-gradient(135deg, #f85032, #e73827); }
 .cat-afri { background: linear-gradient(135deg, #4b6cb7, #182848); }
 .cat-all { background: linear-gradient(135deg, #616161, #212121); }
+
+/* Contenedor de la parrilla */
+.submode-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas iguales */
+    gap: 15px;
+    padding: 20px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* El último botón (el 5º) se expande a las dos columnas */
+.submode-grid button:last-child:nth-child(5) {
+    grid-column: span 2;
+    justify-self: center;
+    width: 100%;
+}
+
+/* Diseño de los botones */
+.btn-category {
+    background: var(--bg-card, #fff);
+    border: 2px solid #e0e0e0;
+    border-radius: 15px;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.btn-category:hover {
+    transform: translateY(-5px);
+    border-color: #3498db;
+    box-shadow: 0 8px 15px rgba(52, 152, 219, 0.2);
+}
+
+.btn-category span:first-child {
+    transition: transform 0.3s ease;
+}
+
+.btn-category:hover span:first-child {
+    transform: scale(1.2);
+}
+
+/* Parrilla 2-2-1 */
+.submode-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 10px;
+    width: 100%;
+}
+
+.submode-grid button:last-child:nth-child(5) {
+    grid-column: span 2; /* Centra el 5º botón abajo */
+}
+
+/* Estilo Base de Botones de Categoría */
+.btn-category {
+    border: none;
+    border-radius: 16px;
+    padding: 20px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.btn-category:active { transform: scale(0.95); }
+
+/* Bloque de Degradados Modernos */
+.grad-tech  { background: linear-gradient(135deg, #00c6ff, #0072ff); }
+.grad-cars  { background: linear-gradient(135deg, #f12711, #f5af19); }
+.grad-food  { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.grad-fashion { background: linear-gradient(135deg, #8e2de2, #4a00e0); }
+.grad-euro  { background: linear-gradient(135deg, #2193b0, #6dd5ed); }
+.grad-amer  { background: linear-gradient(135deg, #eb3349, #f45c43); }
+.grad-asia  { background: linear-gradient(135deg, #ff512f, #dd2476); }
+.grad-afri  { background: linear-gradient(135deg, #f09819, #edde5d); }
+.grad-hist  { background: linear-gradient(135deg, #4b6cb7, #182848); }
+.grad-cienc { background: linear-gradient(135deg, #0cebeb, #20e3b2, #29ffc6); }
+.grad-ent   { background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); }
+.grad-dep   { background: linear-gradient(135deg, #1d976c, #93f9b9); }
+.grad-all   { background: linear-gradient(135deg, #30e8d8, #fe2851); }
